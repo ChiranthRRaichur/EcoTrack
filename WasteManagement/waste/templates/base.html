@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>{% block title %}EcoTrack{% endblock %}</title>
+    <!-- Bootstrap CSS -->
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+    />
+    <!-- Font Awesome for icons -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
+    />
+    <!-- Custom styles -->
+
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/style.css' %}" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Syne:wght@400..800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..800;1,400..800&family=Syne:wght@400..800&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+      .jumbotron {
+        background-image: url("{% static 'images/Home-page.jpg' %}");
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        padding: 80px 15px 100px;
+        margin-bottom: 0;
+        border-radius: 0.3rem;
+        position: relative;
+        height: 500px;
+      }
+    </style>
+    {% block extra_head %}{% endblock %}
+  </head>
+
+  <body>
+    <header>
+      <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+          <a class="navbar-brand" href="/"
+            >EcoTrack - A Digital Waste Collection App</a
+          >
+          <button
+            class="navbar-toggler"
+            type="button"
+            data-toggle="collapse"
+            data-target="#navbarNav"
+          >
+            <span class="navbar-toggler-icon"></span>
+          </button>
+          <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ml-auto">
+              <li class="nav-item">
+                <a class="nav-link" href="{% url 'home' %}">Home</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="{% url 'about' %}">About Us</a>
+              </li>
+              {% if user.is_authenticated %}
+              <li class="nav-item">
+                <a class="nav-link" href="{% url 'logout' %}">Logout</a>
+              </li>
+              <li class="nav-item" >
+                &nbsp; <span class="navbar-text" style="color: rgb(73, 223, 223);">Welcome, {{ user.username }}</span>
+              </li>
+              {% else %}
+              <li class="nav-item">
+                <a class="nav-link" href="{% url 'login' %}">Login</a>
+              </li>
+              {% endif %}
+            </ul>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main>
+      {% block content %}
+      <div class="jumbotron"></div>
+
+      <section class="container waste-management-section">
+        <div class="row">
+          <div>
+            <h2>Waste Management</h2>
+            <br />
+            <p>
+              Waste management involves the collection, transportation, and
+              disposal of garbage, sewage, and other waste products. Effective
+              waste management is crucial for maintaining cleanliness,
+              preventing environmental pollution, and promoting sustainable
+              development.
+            </p>
+            <br />
+            <p>
+              Proper waste management practices include recycling, composting,
+              and safe disposal methods to minimize the impact on our
+              environment. By managing waste responsibly, we can contribute to a
+              healthier and cleaner community for future generations.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <br />
+      <br />
+
+      <section class="container">
+        <div class="row">
+          <div class="col-md-4 mb-4">
+            <div class="card">
+              <img
+                src="https://thumbs.dreamstime.com/b/garbage-dump-landfill-vector-urban-landscape-background-symbol-pollution-environment-illustration-90858469.jpg"
+                class="card-img-top"
+                alt="Card image"
+              />
+              <div class="card-body">
+                <h4
+                  style="
+                    font-family: Syne, sans-serif;
+                    font-optical-sizing: auto;
+                    font-weight: 700;
+                    font-style: normal;
+                    text-align: center;
+                    margin-top: 7px;
+                  "
+                >
+                  Landfill
+                </h4>
+                <p class="card-text">
+                  A landfill is a managed site where waste is buried under the
+                  ground. It's a method used for garbage disposal that aims to
+                  control environmental impact.
+                </p>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4 mb-4">
+            <div class="card">
+              <img
+                src="https://thumbs.dreamstime.com/b/incineration-plant-garbage-truck-waste-factory-trash-transportation-recycling-rubbish-disposal-smoke-pipes-nature-pollution-290590901.jpg"
+                class="card-img-top"
+                alt="Card image"
+              />
+              <div class="card-body">
+                <h4
+                  style="
+                    font-family: Syne, sans-serif;
+                    font-optical-sizing: auto;
+                    font-weight: 700;
+                    font-style: normal;
+                    text-align: center;
+                    margin-top: 7px;
+                  "
+                >
+                  Incineration
+                </h4>
+                <p class="card-text">
+                  Incineration is a waste treatment process that involves the
+                  combustion of organic substances contained in waste materials.
+                  It is used to convert waste into ash, flue gas, and heat.
+                </p>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4 mb-4">
+            <div class="card">
+              <img
+                src="https://img.freepik.com/free-vector/hand-drawn-biogas-illustration_23-2149408845.jpg?w=360"
+                class="card-img-top"
+                alt="Card image"
+              />
+              <div class="card-body">
+                <h4
+                  style="
+                    font-family: Syne, sans-serif;
+                    font-optical-sizing: auto;
+                    font-weight: 700;
+                    font-style: normal;
+                    text-align: center;
+                    margin-top: 7px;
+                  "
+                >
+                  Biogas
+                </h4>
+                <p class="card-text">
+                  Biogas is a renewable energy produced from the anaerobic
+                  digestion of organic waste, mainly consisting of methane and
+                  carbon dioxide.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-4 mb-4">
+            <div class="card">
+              <img
+                src="https://media.istockphoto.com/id/1688393591/vector/pyrolysis-process-with-biochar-sequestration.jpg?s=612x612&w=0&k=20&c=6gwm6M03y-S7_XpEWAUsBVo398KG62ZevcOx23pyW_s="
+                class="card-img-top"
+                alt="Card image"
+              />
+              <div class="card-body">
+                <h4
+                  style="
+                    font-family: Syne, sans-serif;
+                    font-optical-sizing: auto;
+                    font-weight: 700;
+                    font-style: normal;
+                    text-align: center;
+                    margin-top: 7px;
+                  "
+                >
+                  Pyrolysis
+                </h4>
+                <p class="card-text">
+                  Pyrolysis and gasification are innovative technologies
+                  transforming waste into valuable resources through controlled
+                  thermal decomposition.
+                </p>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4 mb-4">
+            <div class="card">
+              <img
+                src="https://us.123rf.com/450wm/mnbxgraphics/mnbxgraphics1909/mnbxgraphics190900027/129482378-hand-drawn-zero-waste-banner-ecological-lifestyle-vector-illustration-in-modern-trendy-flat-cartoon.jpg"
+                class="card-img-top"
+                alt="Card image"
+              />
+              <div class="card-body">
+                <h4
+                  style="
+                    font-family: Syne, sans-serif;
+                    font-optical-sizing: auto;
+                    font-weight: 700;
+                    font-style: normal;
+                    text-align: center;
+                    margin-top: 7px;
+                  "
+                >
+                  Composting
+                </h4>
+                <p class="card-text">
+                  Composting enriches soil health by recycling organic waste
+                  into nutrient-rich fertilizer, promoting sustainable
+                  agriculture.
+                </p>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4 mb-4">
+            <div class="card">
+              <img
+                src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRoYHV1SW8UpiGJlFjpstdpYyOc0L8bYf94lw&s"
+                class="card-img-top"
+                alt="Card image"
+              />
+              <div class="card-body">
+                <h4
+                  style="
+                    font-family: Syne, sans-serif;
+                    font-optical-sizing: auto;
+                    font-weight: 700;
+                    font-style: normal;
+                    text-align: center;
+                    margin-top: 7px;
+                  "
+                >
+                  Recycling
+                </h4>
+                <p class="card-text">
+                  "Reduce, reuse, recycle: Sustainable actions for a cleaner
+                  future."
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <br />
+    <br />
+
+    <div class="fixed-bottom">
+      <div class="icon-container">
+        <div class="icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512">
+            <path
+              d="M353.8 54.1L330.2 6.3c-3.9-8.3-16.1-8.6-20.4 0L286.2 54.1l-52.3 7.5c-9.3 1.4-13.3 12.9-6.4 19.8l38 37-9 52.1c-1.4 9.3 8.2 16.5 16.8 12.2l46.9-24.8 46.6 24.4c8.6 4.3 18.3-2.9 16.8-12.2l-9-52.1 38-36.6c6.8-6.8 2.9-18.3-6.4-19.8l-52.3-7.5zM256 256c-17.7 0-32 14.3-32 32l0 192c0 17.7 14.3 32 32 32l128 0c17.7 0 32-14.3 32-32l0-192c0-17.7-14.3-32-32-32l-128 0zM32 320c-17.7 0-32 14.3-32 32L0 480c0 17.7 14.3 32 32 32l128 0c17.7 0 32-14.3 32-32l0-128c0-17.7-14.3-32-32-32L32 320zm416 96l0 64c0 17.7 14.3 32 32 32l128 0c17.7 0 32-14.3 32-32l0-64c0-17.7-14.3-32-32-32l-128 0c-17.7 0-32 14.3-32 32z"
+            />
+          </svg>
+          <p>Score</p>
+        </div>
+        <div class="icon camera-icon">
+          <a href="{% url 'upload_photo' %}" id="camera-icon">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 48 48"
+              id="camera"
+            >
+              <path
+                fill="#192340"
+                d="M24,18a8,8,0,1,0,8,8A8,8,0,0,0,24,18Zm-3.2,5.6A4,4,0,0,0,20,26v1H18V26a5.93,5.93,0,0,1,1.2-3.6l.61-.8,1.59,1.21ZM25,22H24a3.84,3.84,0,0,0-.79.08l-1,.21-.43-1.95,1-.22A5.77,5.77,0,0,1,24,20h1Z"
+              ></path>
+              <path
+                fill="#192340"
+                d="M41,12H35.54L33,8.23A5,5,0,0,0,28.86,6H19.14A5,5,0,0,0,15,8.23L12.46,12H7a5,5,0,0,0-5,5V37a5,5,0,0,0,5,5H41a5,5,0,0,0,5-5V17A5,5,0,0,0,41,12ZM24,36A10,10,0,1,1,34,26,10,10,0,0,1,24,36Z"
+              ></path>
+            </svg>
+            <p>Camera</p>
+          </a>
+        </div>
+
+        <div class="icon">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            id="history"
+          >
+            <path fill="none" d="M0 0h24v24H0V0z"></path>
+            <path
+              d="M13.26 3C8.17 2.86 4 6.95 4 12H2.21c-.45 0-.67.54-.35.85l2.79 2.8c.2.2.51.2.71 0l2.79-2.8c.31-.31.09-.85-.36-.85H6c0-3.9 3.18-7.05 7.1-7 3.72.05 6.85 3.18 6.9 6.9.05 3.91-3.1 7.1-7 7.1-1.61 0-3.1-.55-4.28-1.48-.4-.31-.96-.28-1.32.08-.42.42-.39 1.13.08 1.49C9 20.29 10.91 21 13 21c5.05 0 9.14-4.17 9-9.26-.13-4.69-4.05-8.61-8.74-8.74zm-.51 5c-.41 0-.75.34-.75.75v3.68c0 .35.19.68.49.86l3.12 1.85c.36.21.82.09 1.03-.26.21-.36.09-.82-.26-1.03l-2.88-1.71v-3.4c0-.4-.34-.74-.75-.74z"
+            ></path>
+          </svg>
+          <p>History</p>
+        </div>
+      </div>
+    </div>
+    {% endblock %}
+
+    <footer class="footer mt-auto py-3">
+      <div class="container">
+        <div class="row">
+          <div class="col-md-6">
+            <div class="footer-content">
+              <h5 class="text-uppercase mb-4">Contact Us</h5>
+              <div class="footer-contact">
+                <p><i class="fas fa-phone-alt"></i> Mobile: +91 9876543210</p>
+                <p>
+                  <i class="fab fa-facebook"></i>
+                  <a
+                    href="https://www.facebook.com/communitywastemanagement"
+                    target="_blank"
+                    >Facebook</a
+                  >
+                </p>
+                <p>
+                  <i class="fab fa-twitter"></i>
+                  <a
+                    href="https://www.twitter.com/communitywaste"
+                    target="_blank"
+                    >Twitter</a
+                  >
+                </p>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="footer-content">
+              <h5 class="text-uppercase mb-4">About Us</h5>
+              <p>
+                Community Waste Management Office,<br />
+                BBMP Building, <br />
+                Bangalore, Karnataka, India
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </footer>
+    <!-- Bootstrap JS, Popper.js, and jQuery -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@1.16.1/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  </body>
+</html>

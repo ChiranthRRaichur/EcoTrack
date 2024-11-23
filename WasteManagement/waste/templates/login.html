@@ -1,0 +1,152 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Login - EcoTrack
+{% endblock %}
+
+{% block extra_head %}
+<style>
+    /* Set the page background */
+    body {
+        background: linear-gradient(to right, #e8f5e9, #a5d6a7); /* Green gradient */
+        font-family: 'Roboto', sans-serif;
+    }
+
+    /* Style the login card */
+    .card {
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+    }
+
+    .card-header {
+        padding: 20px;
+        text-align: center;
+        background: linear-gradient(90deg, #4caf50, #81c784); /* Green gradient for header */
+        color: white;
+    }
+
+    .card-header h2 {
+        font-family: 'Poppins', sans-serif;
+        font-weight: 600;
+    }
+
+    /* Style the card body */
+    .card-body {
+        padding: 30px;
+        background-color: #f7fff4; /* Light green for body */
+        border-top: 5px solid #4caf50; /* Green border */
+    }
+
+    /* Style the form inputs */
+    .card-body form input[type="text"],
+    .card-body form input[type="password"] {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 15px;
+        border: 1px solid #ccc; /* Light border */
+        border-radius: 5px; /* Rounded corners */
+        box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1); /* Subtle shadow inside the input */
+        font-size: 16px; /* Larger font size */
+        font-family: 'Roboto', sans-serif; /* Consistent font */
+        transition: border-color 0.3s, box-shadow 0.3s; /* Smooth hover/focus transition */
+    }
+
+    .card-body form input[type="text"]:focus,
+    .card-body form input[type="password"]:focus {
+        border-color: #4caf50; /* Green border on focus */
+        box-shadow: 0 0 5px rgba(76, 175, 80, 0.5); /* Green glow */
+        outline: none; /* Remove default focus outline */
+    }
+
+    /* Style the labels */
+    .card-body form label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: bold;
+        color: #4caf50; /* Green label color */
+        font-size: 14px;
+    }
+
+    /* Style the login button */
+    .card-body form button {
+        display: block;
+        width: 100%;
+        padding: 10px;
+        border: none;
+        border-radius: 5px;
+        background: linear-gradient(90deg, #66bb6a, #43a047); /* Green gradient */
+        color: white;
+        font-size: 16px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: background 0.3s;
+    }
+
+    .card-body form button:hover {
+        background: #388e3c; /* Darker green on hover */
+    }
+
+    /* Style the 'Sign Up' link */
+    .card-body p a {
+        text-decoration: none;
+        color: #4caf50; /* Green link color */
+        font-weight: bold;
+        transition: color 0.3s;
+    }
+
+    .card-body p a:hover {
+        color: #388e3c; /* Darker green on hover */
+    }
+
+    /* Style the 'Remember Me' checkbox */
+    .remember-me-container {
+        display: flex;
+        align-items: center;
+        margin-bottom: 15px;
+    }
+
+    .remember-me-container input {
+        margin-right: 10px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center align-items-center" style="min-height: 90vh;">
+        <div class="col-md-6">
+            <div class="card shadow-lg">
+                <div class="card-header">
+                    <h2>Welcome Back!</h2>
+                    <p style="font-size: 14px;">Log in to manage your waste efficiently</p>
+                </div>
+                <div class="card-body">
+                    <form method="post" action="{% url 'login' %}">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <label for="email">Email</label>
+                            <input type="text" name="email" id="email" class="form-control" placeholder="Enter your email" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="password">Password</label>
+                            <input type="password" name="password" id="password" class="form-control" placeholder="Enter your password" required>
+                        </div>
+                        <div class="remember-me-container">
+                            <input type="checkbox" name="remember_me" id="remember_me">
+                            <label for="remember_me">Remember Me</label>
+                        </div>
+                        <div class="text-center">
+                            <button type="submit" class="btn btn-success btn-block">Login</button>
+                        </div>
+                    </form>
+                    <hr>
+                    <p class="text-center">
+                        Don't have an account? <a href="{% url 'signup' %}">Sign Up</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

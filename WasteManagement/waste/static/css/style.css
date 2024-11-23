@@ -1,0 +1,323 @@
+
+.navbar {
+    font-size: 18px;
+    /* Increased font size for navbar links */
+}
+
+.header-background {
+    background-color: #161414;
+    /* Dark background color */
+}
+
+.brand-full {
+    display: inline;
+}
+
+.brand-short {
+    display: none;
+}
+
+
+  /* Style for the fixed bottom section */
+  .fixed-bottom {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color: #eaffdc;
+    box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    display: flex;
+    justify-content: space-around;
+    padding: 10px 0;
+  }
+
+  /* Container for icons */
+  .icon-container {
+    display: flex;
+    justify-content: space-around;
+    width: 100%;
+  }
+
+  /* Individual icon styling */
+  .icon {
+    text-align: center;
+    font-size: 12px;
+  }
+
+  .icon svg {
+    width: 40px;
+    height: 40px;
+    /* margin-bottom: 5px; */
+    fill: #333;
+    /* If you need to color your SVGs */
+  }
+
+  /* Specific style for Camera Icon */
+  .camera-icon {
+    background-color: #9fe875;
+    /* White background for the camera section */
+    border-top-left-radius: 50px;
+    /* Top left border radius */
+    border-top-right-radius: 50px;
+    /* Top right border radius */
+    padding: 10px 15px 0px 15px;
+    box-shadow: 0px -2px 10px rgba(117, 64, 64, 0.1);
+    /* Soft shadow for emphasis */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .camera-icon svg {
+    width: 50px;
+    /* Enlarged camera icon */
+    height: 30px;
+    /* Enlarged camera icon */
+  }
+
+  .camera-icon:hover svg {
+    transform: scale(1.1);
+    /* Slightly enlarge the icon on hover */
+  }
+
+  /* Other icons remain unaffected */
+  .icon:hover svg {
+    opacity: 0.8;
+  }
+
+  /* For responsiveness */
+  @media (max-width: 768px) {
+    .icon svg {
+      width: 35px;
+      height: 35px;
+    }
+
+    .camera-icon svg {
+      width: 50px;
+      height: 50px;
+    }
+  }
+
+/* Show short title on mobile screens */
+@media (max-width: 575px) {
+    .brand-full {
+        display: none;
+    }
+
+    .brand-short {
+        display: inline;
+        padding-left: 80px;
+    }
+
+
+}
+
+/* Optional: Adjust font size for mobile */
+.header-background .navbar-brand {
+    font-size: 24px;
+}
+
+.navbar-dark .navbar-brand {
+    color: #ffffff;
+    font-family: 'Syne', sans-serif;
+    font-optical-sizing: auto;
+    font-weight: 700;
+    font-style: normal;
+}
+
+.navbar-brand {
+    display: inline-block;
+    padding-top: .3125rem;
+    padding-bottom: .3125rem;
+    margin-right: 1rem;
+    font-size: 1.25rem;
+    line-height: inherit;
+    white-space: nowrap;
+}
+
+a {
+    color: #007bff;
+    text-decoration: none;
+    background-color: transparent;
+}
+
+/* photo change - 16/11/24 */
+
+/* Mobile-specific styles */
+@media (max-width: 575px) {
+    .jumbotron {
+        padding: 2rem 1rem;
+        font-size: 1.1rem;
+        /* Adjust font size for better readability */
+    }
+}
+
+/* Tablet-specific styles */
+@media (min-width: 576px) and (max-width: 767px) {
+    .jumbotron {
+        padding: 4rem 2rem;
+    }
+}
+
+/* Desktop-specific styles */
+@media (min-width: 768px) {
+    .jumbotron {
+        padding: 6rem 3rem;
+    }
+}
+
+/* .jumbotron h1 {
+    color: darkgreen;
+    font-weight: 600;
+
+    font-family: "Syne", sans-serif;
+    font-weight: 700;
+    font-style: normal;
+} */
+
+/* tion - 16/11/24 */
+/* General styles for the waste management section */
+.waste-management-section {
+    text-align: center;
+    margin-top: 50px;
+    padding: 20px; /* Added padding to improve spacing */
+}
+
+.waste-management-section h2 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-style: normal;
+    margin-top: 50px;
+    font-size: 2.5rem; /* Default font size for larger screens */
+}
+
+.waste-management-section p {
+    font-family: 'EB Garamond', serif;
+    font-weight: 400;
+    font-style: normal;
+    font-size: 1.2rem; /* Default font size for readability */
+    line-height: 1.8;
+    margin: 0 auto;
+    max-width: 800px;
+}
+
+/* Mobile-specific styles */
+@media (max-width: 575px) {
+    .waste-management-section {
+        margin-top: 20px; /* Reduce top margin on smaller screens */
+        padding: 10px; /* Adjust padding for better fit */
+    }
+
+    .waste-management-section h2 {
+        font-size: 1.8rem; /* Reduce title font size */
+        margin-top: 30px;
+    }
+
+    .waste-management-section p {
+        font-size: 1rem; /* Reduce paragraph font size */
+        line-height: 1.5; /* Adjust line height */
+        padding: 0 15px; /* Add horizontal padding for readability */
+        max-width: 100%; /* Allow full width on small screens */
+    }
+}
+
+/* Tablet-specific styles */
+@media (min-width: 576px) and (max-width: 767px) {
+    .waste-management-section h2 {
+        font-size: 2.2rem; /* Slightly smaller title for tablets */
+    }
+
+    .waste-management-section p {
+        font-size: 1.1rem; /* Adjust paragraph size */
+        max-width: 90%; /* Allow more width on tablets */
+    }
+}
+
+/* Desktop-specific styles */
+@media (min-width: 768px) {
+    .waste-management-section h2 {
+        font-size: 2.5rem; /* Larger title for desktop */
+    }
+
+    .waste-management-section p {
+        font-size: 1.2rem;
+        max-width: 800px; /* Restrict width for better readability */
+    }
+}
+
+
+
+
+.footer {
+    background-color: #343a40;
+    /* Dark background color for the footer */
+    color: #ffffff;
+    /* Light text color for the footer */
+    padding-top: 20px;
+}
+
+.footer a {
+    color: #ffffff;
+    /* Link color in the footer */
+}
+
+.card {
+    height: 100%;
+    /* Make all cards in a row of equal height */
+    position: relative;
+    overflow: hidden;
+}
+
+.card img {
+    transition: opacity 0.3s ease;
+}
+
+.card:hover img {
+    opacity: 0.6;
+}
+/* Style the container for the text under icons */
+.icon p {
+    margin-top: 5px; /* Add some spacing between the icon and text */
+    font-size: 14px; /* Set the font size for the text */
+    font-weight: bold; /* Make the text bold */
+    text-align: center; /* Center align the text under the icon */
+    color: #4caf50; /* Use green color for text to match the theme */
+    font-family: 'Roboto', sans-serif; /* Use consistent font */
+    transition: color 0.3s; /* Smooth hover effect for color change */
+}
+
+/* Remove underline from the anchor tag on hover */
+.icon a {
+    text-decoration: none; /* No underline */
+    color: inherit; /* Use inherited color */
+}
+
+/* Keep the text unaltered on hover for mobile-friendly behavior */
+.icon:hover p {
+    color: #4caf50; /* Keep the text color consistent on hover */
+}
+
+/* Style for the icon container */
+.icon {
+    display: flex;
+    flex-direction: column; /* Stack icon and text vertically */
+    justify-content: center;
+    align-items: center;
+    cursor: pointer; /* Make the entire icon clickable */
+}
+
+/* Specific styling for camera icon text */
+.camera-icon p {
+    font-size: 16px; /* Slightly larger text for camera */
+    color: #009688; /* Unique color for camera text */
+    font-weight: bold;
+}
+
+/* Mobile-specific styles */
+@media (max-width: 768px) {
+    .icon p {
+        font-size: 12px; /* Adjust font size for smaller screens */
+    }
+}
