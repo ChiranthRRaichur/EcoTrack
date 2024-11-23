@@ -10,6 +10,7 @@ urlpatterns = [
     path('login/', views.login_view, name='login'),  # Use your custom login view
     path('logout/', views.logout_view, name='logout'),
     path('upload-photo/', views.upload_photo, name='upload_photo'),
+    path('score-board/', views.score_board, name='score_board'),
 ]
 
 

@@ -15,6 +15,7 @@ class WasteReport(models.Model):
 class CustomUser(AbstractUser):
     email = models.EmailField(unique=True)
     phone_number = models.CharField(max_length=10, blank=True, null=True)
+    points = models.IntegerField(default=0)  # Add a field for user points
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username']

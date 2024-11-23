@@ -11,6 +11,7 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
 import os
+from .models import CustomUser
 
 def home(request):
     return render(request, 'base.html')
@@ -103,6 +104,22 @@ def upload_photo(request):
         return render(request, 'upload_photo.html')
 
     return JsonResponse({'error': 'Invalid request method.'}, status=405)
+
+def score_board(request):
+    users = CustomUser.objects.all().order_by('-points')  # Sort by points (highest first)
+    context = {'users': users}
+    return render(request, 'score_board.html', context)
+
+def approve_photo(photo_id, approved=True, is_duplicate=False):
+    photo = WasteReport.objects.get(id=photo_id)
+    user = photo.user
+    if approved:
+        if is_duplicate:
+            user.points += 5  # Award 5 points for duplicate photo
+        else:
+            user.points += 10  # Award 10 points for unique, valid photo
+        user.save()
+
 
 
 
