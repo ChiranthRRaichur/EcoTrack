@@ -13,6 +13,7 @@ from django.conf import settings
 import os
 from .models import CustomUser
 
+
 def home(request):
     return render(request, 'base.html')
 
@@ -70,6 +71,7 @@ def login_view(request):
     return render(request, 'login.html', {'form': form})
 
 
+
 @csrf_exempt
 def upload_photo(request):
     if request.method == 'POST':
@@ -79,6 +81,8 @@ def upload_photo(request):
             image_data = data.get('image')
             location = data.get('location', 'Unknown Location')
             waste_type = data.get('waste_type', 'General')
+            contact_information = data.get('contact_information', '')
+            nearby_landmarks = data.get('nearby_landmarks', '')
 
             if not image_data:
                 return JsonResponse({'error': 'No image data provided'}, status=400)
@@ -88,12 +92,14 @@ def upload_photo(request):
             ext = format.split('/')[-1]
             image_file = ContentFile(base64.b64decode(imgstr), name=f"waste_{waste_type}_{location}.{ext}")
 
-            # Save the image in the database
+            # Save the image and additional details in the database
             WasteReport.objects.create(
                 user=request.user,  # Assuming user is logged in
                 photo=image_file,
                 location=location,
-                waste_type=waste_type
+                waste_type=waste_type,
+                contact_information=contact_information,
+                nearby_landmarks=nearby_landmarks
             )
             return JsonResponse({'message': 'Photo uploaded successfully!'}, status=201)
         except Exception as e:
@@ -104,6 +110,7 @@ def upload_photo(request):
         return render(request, 'upload_photo.html')
 
     return JsonResponse({'error': 'Invalid request method.'}, status=405)
+
 
 def score_board(request):
     users = CustomUser.objects.all().order_by('-points')  # Sort by points (highest first)

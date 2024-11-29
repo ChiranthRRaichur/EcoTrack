@@ -1,31 +1,51 @@
 /* static/css/upload_photo.css */
 
+/* General container styling */
 .container {
     max-width: 100%;
     padding: 15px;
+    margin: 0 auto; /* Center the container */
 }
 
 h2 {
     font-size: 1.8rem; /* Adjust font size for mobile */
+    text-align: center;
 }
 
+/* Styling for input fields */
 .form-control {
     font-size: 1rem;
     padding: 10px;
     border-radius: 5px;
 }
 
+/* Styling for the map */
 #map {
     width: 100%;
     height: 300px; /* Fixed height for map */
 }
 
+/* Button styling */
 .btn {
     font-size: 1rem;
     padding: 12px;
+    border-radius: 5px;
+    margin-top: 10px; /* Add margin for separation between buttons */
 }
 
-/* Responsive styling */
+/* Make file upload and capture buttons adjacent */
+.file-upload-group {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px; /* Adds space between the buttons */
+}
+
+.file-upload-group .form-group,
+.file-upload-group button {
+    flex: 1; /* Make each button take equal space */
+}
+
+/* Responsive styling for mobile */
 @media (max-width: 768px) {
     h2 {
         font-size: 1.5rem; /* Smaller font for mobile */
@@ -37,5 +57,11 @@ h2 {
 
     .btn {
         font-size: 0.9rem;
+        padding: 10px; /* Smaller buttons for mobile */
+    }
+
+    /* Adjust layout for smaller screens */
+    .file-upload-group {
+        flex-direction: column; /* Stack buttons vertically on mobile */
     }
 }

@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>Report Detail for {{ report_approval.report.user.username }}</h2>
+<p>Location: {{ report_approval.report.location }}</p>
+<p>Waste Type: {{ report_approval.report.waste_type }}</p>
+<p>Status: {{ report_approval.status }}</p>
+<p>Points Awarded: {{ report_approval.points_awarded }}</p>
+
+<img src="{{ report_approval.report.photo.url }}" alt="Uploaded Photo" width="300">
+
+<form method="POST">
+    {% csrf_token %}
+    <button type="submit" name="action" value="approve">Approve</button>
+    <button type="submit" name="action" value="reject">Reject</button>
+</form>
+{% endblock %}

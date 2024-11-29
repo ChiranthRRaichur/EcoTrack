@@ -2,15 +2,23 @@ from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
+
+
 class WasteReport(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     photo = models.ImageField(upload_to='waste_photos/')
     location = models.CharField(max_length=255)
     waste_type = models.CharField(max_length=50)
-    created_at = models.DateTimeField(auto_now_add=True)
+    description = models.TextField(null=True, blank=True)
+    priority = models.CharField(max_length=10, choices=[('low', 'Low'), ('medium', 'Medium'), ('high', 'High')], default='low')
+    contact_information = models.CharField(max_length=255, blank=True, null=True)  # New field for user contact
+    nearby_landmarks = models.CharField(max_length=255, blank=True, null=True)  # New field for nearby landmarks
+    created_at = models.DateTimeField(auto_now_add=True)  # Automatically generated timestamp
 
     def __str__(self):
         return f"{self.user.email} - {self.waste_type}"
+
+
 
 class CustomUser(AbstractUser):
     email = models.EmailField(unique=True)

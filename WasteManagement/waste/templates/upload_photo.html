@@ -11,7 +11,7 @@
     <h2 class="text-center mb-4">Upload Waste Photo</h2>
 
     <div class="text-center">
-        <!-- Video Stream -->
+        <!-- Video Stream for Webcam -->
         <video id="webCam" autoplay playsinline width="640" height="480" class="border border-success rounded"></video>
         
         <!-- Canvas for Captured Image -->
@@ -20,11 +20,62 @@
         <!-- Image Preview -->
         <img id="capturedImage" alt="Captured Image" style="display: none; width: 100%; max-width: 640px; margin-top: 10px;" />
         
-        <!-- Capture and Upload Buttons -->
-        <div class="mt-3">
+        <!-- File Upload and Capture Buttons -->
+        <div class="file-upload-group mt-3">
+            <div class="form-group">
+                <label for="fileUpload" class="btn btn-secondary">Upload Image</label>
+                <input type="file" id="fileUpload" accept="image/*" style="display: none;">
+            </div>
+
             <button id="captureButton" class="btn btn-primary">Capture Photo</button>
-            <button id="uploadButton" class="btn btn-success" disabled>Upload Photo</button>
         </div>
+    </div>
+
+    <!-- Additional form fields for submission -->
+    <div class="mt-5">
+        <form id="wasteForm">
+            <div class="form-group">
+                <label for="location">Location:</label>
+                <input type="text" class="form-control" id="location" placeholder="Enter location" required>
+            </div>
+            <div class="form-group">
+                <label for="wasteType">Waste Type:</label>
+                <select class="form-control" id="wasteType" required>
+                    <option value="plastic">Plastic</option>
+                    <option value="organic">Organic</option>
+                    <option value="hazardous">Hazardous</option>
+                    <option value="general">General</option>
+                    <option value="mixed-waste">Mixed-waste</option>
+                    <option value="unsorted">Unsorted Waste</option>
+                    <option value="multi-waste">Multi-waste</option>   
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="description">Description:</label>
+                <textarea class="form-control" id="description" rows="3" placeholder="Any additional comments?" required></textarea>
+            </div>
+            <div class="form-group">
+                <label for="priority">Priority Level:</label>
+                <select class="form-control" id="priority" required>
+                    <option value="low">Low</option>
+                    <option value="medium">Medium</option>
+                    <option value="high">High</option>
+                </select>
+            </div>
+
+            <!-- Nearby Landmarks -->
+            <div class="form-group mt-3">
+                <label for="nearbyLandmarks">Nearby Landmarks</label>
+                <input type="text" id="nearbyLandmarks" class="form-control" placeholder="E.g., school, park, etc.">
+            </div>
+
+            <!-- Contact Information -->
+            <div class="form-group mt-3">
+                <label for="contactInformation">Contact Information</label>
+                <input type="text" id="contactInformation" class="form-control" placeholder="Phone number or email">
+            </div>
+
+        </form>
     </div>
 </div>
 {% endblock %}
@@ -45,7 +96,7 @@
         .then(() => console.log("Webcam started successfully."))
         .catch(err => console.error("Error starting webcam:", err));
 
-    // Capture Photo
+    // Capture Photo from Webcam
     document.getElementById('captureButton').addEventListener('click', () => {
         const picture = webcam.snap(); // Capture photo and get base64 data
         capturedImage.src = picture;  // Display the captured image
@@ -56,14 +107,38 @@
         document.getElementById('uploadButton').disabled = false;
     });
 
+    // Handle File Upload
+    document.getElementById('fileUpload').addEventListener('change', (event) => {
+        const file = event.target.files[0];
+
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                capturedImage.src = e.target.result; // Set the file preview
+                capturedImage.style.display = 'block';
+                canvasElement.style.display = 'none'; // Hide webcam preview
+
+                // Enable upload button
+                document.getElementById('uploadButton').disabled = false;
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+
     // Fetch CSRF token from the meta tag
     const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
-    // Upload Photo
+    // Upload Photo (either from webcam or file)
     document.getElementById('uploadButton').addEventListener('click', () => {
         const dataUrl = capturedImage.src; // Get the base64 image
+        const location = document.getElementById('location').value; // Get location from the input field
+        const wasteType = document.getElementById('wasteType').value; // Get waste type
+        const description = document.getElementById('description').value; // Get description
+        const priority = document.getElementById('priority').value; // Get priority level
+        const nearbyLandmarks = document.getElementById('nearbyLandmarks').value; // Get nearby landmarks
+        const contactInformation = document.getElementById('contactInformation').value; // Get contact information
 
-        // Make a POST request to upload the photo
+        // Make a POST request to upload the photo with additional parameters
         fetch("{% url 'upload_photo' %}", {
             method: "POST",
             headers: {
@@ -71,7 +146,13 @@
                 "X-CSRFToken": csrfToken // Use the dynamically fetched CSRF token
             },
             body: JSON.stringify({
-                image: dataUrl
+                image: dataUrl,
+                location: location,
+                waste_type: wasteType,
+                description: description,
+                priority: priority,
+                nearby_landmarks: nearbyLandmarks,
+                contact_information: contactInformation
             })
         })
         .then(response => {

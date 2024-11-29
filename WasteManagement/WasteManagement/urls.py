@@ -5,7 +5,8 @@ from django.urls import path, include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('waste.urls')),  # Include app-level URLs
+    path('', include('waste.urls')),  # End users urls
+     path('admin-portal/', include('admin_app.urls')),  # Admin portal URLs
 ]
 
 # Serve media files during development

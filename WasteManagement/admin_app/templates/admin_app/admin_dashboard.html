@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>Admin Dashboard</h2>
+<table>
+    <thead>
+        <tr>
+            <th>Username</th>
+            <th>Time Submitted</th>
+            <th>Waste Type</th>
+            <th>Status</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for report in reports %}
+        <tr>
+            <td>{{ report.report.user.username }}</td>
+            <td>{{ report.report.created_at }}</td>
+            <td>{{ report.report.waste_type }}</td>
+            <td>{{ report.status }}</td>
+            <td>
+                <a href="{% url 'report_detail' report.id %}">View</a> |
+                <a href="{% url 'approve_report' report.id %}">Approve</a> |
+                <a href="{% url 'reject_report' report.id %}">Reject</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
