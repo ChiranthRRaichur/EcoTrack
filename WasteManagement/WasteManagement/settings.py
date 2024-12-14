@@ -25,7 +25,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'waste',
-    'admin_app'
+    'admin_app',
+    'csp',
 ]
 
 MIDDLEWARE = [
@@ -36,6 +37,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    # 'csp.middleware.CSPMiddleware',
+    
 ]
 
 ROOT_URLCONF = 'WasteManagement.urls'
@@ -126,3 +129,23 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
+# CSP_DEFAULT_SRC = ("'self'",)  # Default policy to restrict to self
+# CSP_SCRIPT_SRC = ("'self'", "'nonce-{nonce}'")
+
+# CSP_DEFAULT_SRC = ("'self'",)
+# CSP_SCRIPT_SRC = ("'self'", "'unsafe-inline'",)  # Allow inline scripts
+# CSP_STYLE_SRC = ("'self'", "'unsafe-inline'",)  # Allow inline styles
+# CSP_STYLE_SRC = ("'self'", "'unsafe-inline'", "https://getbootstrap.com/")  # Allow inline styles
+
+# CSP_SCRIPT_SRC = ("'self'", "'unsafe-inline'", "https://unpkg.com")  # Example of allowing external JS resources
+
+# settings.py
+
+# Define the Content Security Policy
+# CSP_DEFAULT_SRC = ("'self'",)
+# CSP_STYLE_SRC = ("'self'", "https://stackpath.bootstrapcdn.com", "https://cdnjs.cloudflare.com", "https://fonts.googleapis.com")
+# CSP_SCRIPT_SRC = ("'self'", "https://code.jquery.com", "https://stackpath.bootstrapcdn.com", "https://cdn.jsdelivr.net", "https://cdnjs.cloudflare.com")
+# CSP_FONT_SRC = ("'self'", "https://fonts.gstatic.com")
+# CSP_IMG_SRC = ("'self'", "data:", "https://*")  # Allow images from any source, including inline images (data: URIs)
+
+# CSP_INCLUDE_NONCES_IN = ["script-src", "style-src"]  # Use nonces for inline script and style execution

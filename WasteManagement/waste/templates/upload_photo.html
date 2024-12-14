@@ -1,66 +1,41 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}Upload Photo{% endblock %}
-
-{% block extra_head %}
-<meta name="csrf-token" content="{{ csrf_token }}">
-{% endblock %}
 
 {% block content %}
 <div class="container mt-5">
     <h2 class="text-center mb-4">Upload Waste Photo</h2>
 
     <div class="text-center">
-        <!-- Video Stream for Webcam -->
-        <video id="webCam" autoplay playsinline width="640" height="480" class="border border-success rounded"></video>
-        
-        <!-- Canvas for Captured Image -->
-        <canvas id="canvas" style="display: none;"></canvas>
-
-        <!-- Image Preview -->
-        <img id="capturedImage" alt="Captured Image" style="display: none; width: 100%; max-width: 640px; margin-top: 10px;" />
-        
-        <!-- File Upload and Capture Buttons -->
-        <div class="file-upload-group mt-3">
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
             <div class="form-group">
-                <label for="fileUpload" class="btn btn-secondary">Upload Image</label>
-                <input type="file" id="fileUpload" accept="image/*" style="display: none;">
+                <label for="photo">Choose Image:</label>
+                <input type="file" name="photo" id="photo" class="form-control" required>
             </div>
 
-            <button id="captureButton" class="btn btn-primary">Capture Photo</button>
-        </div>
-    </div>
-
-    <!-- Additional form fields for submission -->
-    <div class="mt-5">
-        <form id="wasteForm">
+            <!-- Additional form fields -->
             <div class="form-group">
                 <label for="location">Location:</label>
-                <input type="text" class="form-control" id="location" placeholder="Enter location" required>
+                <input type="text" name="location" id="location" class="form-control" required>
             </div>
+
             <div class="form-group">
-                <label for="wasteType">Waste Type:</label>
-                <select class="form-control" id="wasteType" required>
+                <label for="waste_type">Waste Type:</label>
+                <select name="waste_type" id="waste_type" class="form-control" required>
                     <option value="plastic">Plastic</option>
                     <option value="organic">Organic</option>
                     <option value="hazardous">Hazardous</option>
                     <option value="general">General</option>
                     <option value="mixed-waste">Mixed-waste</option>
                     <option value="unsorted">Unsorted Waste</option>
-                    <option value="multi-waste">Multi-waste</option>   
                 </select>
             </div>
+
             <div class="form-group">
                 <label for="description">Description:</label>
-                <textarea class="form-control" id="description" rows="3" placeholder="Any additional comments?" required></textarea>
-            </div>
-            <div class="form-group">
-                <label for="priority">Priority Level:</label>
-                <select class="form-control" id="priority" required>
-                    <option value="low">Low</option>
-                    <option value="medium">Medium</option>
-                    <option value="high">High</option>
-                </select>
+                <textarea name="description" id="description" class="form-control" rows="3" required></textarea>
             </div>
 
             <!-- Nearby Landmarks -->
@@ -75,101 +50,35 @@
                 <input type="text" id="contactInformation" class="form-control" placeholder="Phone number or email">
             </div>
 
+            <div class="form-group">
+                <label for="priority">Priority Level:</label>
+                <select name="priority" id="priority" class="form-control" required>
+                    <option value="low">Low</option>
+                    <option value="medium">Medium</option>
+                    <option value="high">High</option>
+                </select>
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit" class="btn btn-success mt-4">Submit Report</button>
         </form>
     </div>
 </div>
 {% endblock %}
 
 {% block extra_scripts %}
-<!-- Include the webcam-easy library -->
-<script src="https://unpkg.com/webcam-easy/dist/webcam-easy.min.js"></script>
-
-<script>
-    // Initialize Webcam
-    const webcamElement = document.getElementById('webCam');
-    const canvasElement = document.getElementById('canvas');
-    const capturedImage = document.getElementById('capturedImage');
-    const webcam = new Webcam(webcamElement, 'user', canvasElement);
-
-    // Start Webcam
-    webcam.start()
-        .then(() => console.log("Webcam started successfully."))
-        .catch(err => console.error("Error starting webcam:", err));
-
-    // Capture Photo from Webcam
-    document.getElementById('captureButton').addEventListener('click', () => {
-        const picture = webcam.snap(); // Capture photo and get base64 data
-        capturedImage.src = picture;  // Display the captured image
-        capturedImage.style.display = 'block';
-        canvasElement.style.display = 'none'; // Hide canvas preview (optional)
-
-        // Enable upload button
-        document.getElementById('uploadButton').disabled = false;
-    });
-
-    // Handle File Upload
-    document.getElementById('fileUpload').addEventListener('change', (event) => {
-        const file = event.target.files[0];
-
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                capturedImage.src = e.target.result; // Set the file preview
-                capturedImage.style.display = 'block';
-                canvasElement.style.display = 'none'; // Hide webcam preview
-
-                // Enable upload button
-                document.getElementById('uploadButton').disabled = false;
-            };
-            reader.readAsDataURL(file);
-        }
-    });
-
-    // Fetch CSRF token from the meta tag
-    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-
-    // Upload Photo (either from webcam or file)
-    document.getElementById('uploadButton').addEventListener('click', () => {
-        const dataUrl = capturedImage.src; // Get the base64 image
-        const location = document.getElementById('location').value; // Get location from the input field
-        const wasteType = document.getElementById('wasteType').value; // Get waste type
-        const description = document.getElementById('description').value; // Get description
-        const priority = document.getElementById('priority').value; // Get priority level
-        const nearbyLandmarks = document.getElementById('nearbyLandmarks').value; // Get nearby landmarks
-        const contactInformation = document.getElementById('contactInformation').value; // Get contact information
-
-        // Make a POST request to upload the photo with additional parameters
-        fetch("{% url 'upload_photo' %}", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "X-CSRFToken": csrfToken // Use the dynamically fetched CSRF token
-            },
-            body: JSON.stringify({
-                image: dataUrl,
-                location: location,
-                waste_type: wasteType,
-                description: description,
-                priority: priority,
-                nearby_landmarks: nearbyLandmarks,
-                contact_information: contactInformation
-            })
-        })
-        .then(response => {
-            if (response.ok) {
-                alert("Photo uploaded successfully!");
-                return response.json();
-            }
-            throw new Error("Failed to upload photo.");
-        })
-        .then(data => {
-            console.log("Response from server:", data);
-            window.location.href = "{% url 'home' %}"; // Redirect to home on success
-        })
-        .catch(error => {
-            console.error("Error uploading photo:", error);
-            alert("An error occurred while uploading the photo.");
-        });
-    });
+<!-- Use nonce for inline scripts -->
+<script nonce="{{ nonce }}">
+    // Your inline JavaScript here
+    console.log("This script is allowed by the CSP with nonce");
 </script>
+<script src="{% static 'js/upload_photo.js' %}" nonce="{{ nonce }}"></script>  <!-- Include JS file with nonce -->
 {% endblock %}
+
+
+
+
+
+
+
+

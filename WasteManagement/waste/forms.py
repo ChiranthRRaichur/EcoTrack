@@ -3,6 +3,15 @@ from .models import CustomUser
 from django.core.exceptions import ValidationError
 
 
+from django import forms
+from .models import WasteReport
+
+class WasteReportForm(forms.ModelForm):
+    class Meta:
+        model = WasteReport
+        fields = ['photo', 'location', 'waste_type', 'description', 'priority', 'contact_information', 'nearby_landmarks', 'latitude', 'longitude']
+
+
 class LoginForm(forms.Form):
     email = forms.EmailField(label="Email", widget=forms.EmailInput(attrs={
         'class': 'form-control',
