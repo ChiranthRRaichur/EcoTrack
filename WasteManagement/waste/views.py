@@ -68,84 +68,64 @@ def login_view(request):
         form = LoginForm()
     return render(request, 'login.html', {'form': form})
 
+from .models import WasteReport
 
-# @csrf_exempt  # Allow for POST requests (insecure, but useful for debugging)
-# def upload_photo(request):
-#     if request.method == 'POST':
-#         try:
-#             data = json.loads(request.body.decode('utf-8'))  # Decode JSON data from the request body
-#             image_data = data.get('image')  # Get the base64 image data
-#             location = data.get('location', 'Unknown Location')
-#             waste_type = data.get('waste_type', 'General')
-#             contact_information = data.get('contact_information', '')
-#             nearby_landmarks = data.get('nearby_landmarks', '')
-#             latitude = data.get('latitude', None)
-#             longitude = data.get('longitude', None)
+# views.py
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.shortcuts import render
+from .models import WasteReport
 
-#             if not image_data:
-#                 return JsonResponse({'error': 'No image data provided'}, status=400)
-
-#             # Decode base64 image data
-#             format, imgstr = image_data.split(';base64,')
-#             ext = format.split('/')[-1]
-#             image_file = ContentFile(base64.b64decode(imgstr), name=f"waste_{waste_type}_{location}.{ext}")
-
-#             # Create and save the waste report
-#             WasteReport.objects.create(
-#                 user=request.user,  # Assuming user is logged in
-#                 photo=image_file,
-#                 location=location,
-#                 waste_type=waste_type,
-#                 contact_information=contact_information,
-#                 nearby_landmarks=nearby_landmarks,
-#                 latitude=latitude,
-#                 longitude=longitude
-#             )
-
-#             return JsonResponse({'message': 'Photo uploaded successfully!'}, status=201)
-
-#         except Exception as e:
-#             return JsonResponse({'error': str(e)}, status=500)
-
-#     elif request.method == 'GET':
-#         return render(request, 'upload_photo.html')
-
-#     return JsonResponse({'error': 'Invalid request method.'}, status=405)
-
-
-
-from django.views.decorators.http import require_http_methods
-from django.contrib.auth.decorators import login_required
-
-@login_required
-@require_http_methods(["GET", "POST"])
+@csrf_exempt
 def upload_photo(request):
     if request.method == 'POST':
         try:
-            # Extract form data
             location = request.POST.get('location', 'Unknown Location')
             waste_type = request.POST.get('waste_type', 'General')
             description = request.POST.get('description', '')
             contact_information = request.POST.get('contactInformation', '')
             nearby_landmarks = request.POST.get('nearbyLandmarks', '')
             priority = request.POST.get('priority', 'low')
-            
+
+            # Modify latitude and longitude handling
+            latitude = request.POST.get('latitude')
+            longitude = request.POST.get('longitude')
+
+            # Convert to float only if the value is not empty or None
+            if latitude and latitude.strip():
+                try:
+                    latitude = float(latitude)
+                except ValueError:
+                    latitude = None
+            else:
+                latitude = None
+
+            if longitude and longitude.strip():
+                try:
+                    longitude = float(longitude)
+                except ValueError:
+                    longitude = None
+            else:
+                longitude = None
+
             # Check if photo is uploaded
             if 'photo' not in request.FILES:
                 return JsonResponse({'error': 'No photo uploaded'}, status=400)
             
-            photo = request.FILES['photo']
+            photo = request.FILES['photo']  # Get the photo from request
 
             # Create and save the waste report
             waste_report = WasteReport.objects.create(
-                user=request.user,
+                user=request.user,  # Assuming user is logged in
                 photo=photo,
                 location=location,
                 waste_type=waste_type,
                 description=description,
-                priority=priority,
                 contact_information=contact_information,
-                nearby_landmarks=nearby_landmarks
+                nearby_landmarks=nearby_landmarks,
+                priority=priority,
+                latitude=latitude,
+                longitude=longitude
             )
 
             return JsonResponse({
@@ -158,6 +138,55 @@ def upload_photo(request):
 
     # GET request - render upload form
     return render(request, 'upload_photo.html')
+
+# from django.views.decorators.http import require_http_methods
+# from django.contrib.auth.decorators import login_required
+
+# @login_required
+# @require_http_methods(["GET", "POST"])
+# def upload_photo(request):
+#     if request.method == 'POST':
+#         try:
+#             # Extract form data
+#             location = request.POST.get('location', 'Unknown Location')
+#             waste_type = request.POST.get('waste_type', 'General')
+#             description = request.POST.get('description', '')
+#             contact_information = request.POST.get('contactInformation', '')
+#             nearby_landmarks = request.POST.get('nearbyLandmarks', '')
+#             priority = request.POST.get('priority', 'low')
+            
+#             # Check if photo is uploaded
+#             if 'photo' not in request.FILES:
+#                 return JsonResponse({'error': 'No photo uploaded'}, status=400)
+            
+#             photo = request.FILES['photo']
+
+#             # Create and save the waste report
+#             waste_report = WasteReport.objects.create(
+#                 user=request.user,
+#                 photo=photo,
+#                 location=location,
+#                 waste_type=waste_type,
+#                 description=description,
+#                 priority=priority,
+#                 contact_information=contact_information,
+#                 nearby_landmarks=nearby_landmarks,
+            
+#             )
+
+#             return JsonResponse({
+#                 'message': 'Photo uploaded successfully!', 
+#                 'report_id': waste_report.id
+#             }, status=201)
+
+#         except Exception as e:
+#             return JsonResponse({'error': str(e)}, status=500)
+
+#     # GET request - render upload form
+#     return render(request, 'upload_photo.html')
+
+
+
 def score_board(request):
     users = CustomUser.objects.all().order_by('-points')  # Sort by points (highest first)
     context = {'users': users}

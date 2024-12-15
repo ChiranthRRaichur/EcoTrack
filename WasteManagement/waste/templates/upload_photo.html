@@ -4,81 +4,76 @@
 {% block title %}Upload Photo{% endblock %}
 
 {% block content %}
-<div class="container mt-5">
-    <h2 class="text-center mb-4">Upload Waste Photo</h2>
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h2 class="text-center mb-0">Upload Waste Photo</h2>
+                </div>
+                <div class="card-body">
+                    <form id="uploadForm" method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        
+                        <div class="form-group mb-3">
+                            <label for="photo" class="form-label">Choose Image:</label>
+                            <input type="file" class="form-control" name="photo" id="photo" required>
+                        </div>
 
-    <div class="text-center">
-        <form method="POST" enctype="multipart/form-data">
-            {% csrf_token %}
-            <div class="form-group">
-                <label for="photo">Choose Image:</label>
-                <input type="file" name="photo" id="photo" class="form-control" required>
+                        <div class="form-group mb-3">
+                            <label for="location" class="form-label">Location:</label>
+                            <input type="text" class="form-control" name="location" id="location">
+                            
+                            <!-- Hidden inputs for latitude and longitude -->
+                            <input type="hidden" name="latitude" id="latitude">
+                            <input type="hidden" name="longitude" id="longitude">
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label for="waste_type" class="form-label">Waste Type:</label>
+                            <select class="form-select" name="waste_type" id="waste_type">
+                                <option value="Plastic">Plastic</option>
+                                <option value="Organic">Organic</option>
+                                <option value="Hazardous">Hazardous</option>
+                                <option value="General">General</option>
+                                <option value="Mixed-waste">Mixed-waste</option>
+                                <option value="Unsorted Waste">Unsorted Waste</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label for="description" class="form-label">Description:</label>
+                            <textarea class="form-control" name="description" id="description" rows="3"></textarea>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label for="nearbyLandmarks" class="form-label">Nearby Landmarks:</label>
+                            <input type="text" class="form-control" name="nearbyLandmarks" id="nearbyLandmarks">
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label for="contactInformation" class="form-label">Contact Information:</label>
+                            <input type="text" class="form-control" name="contactInformation" id="contactInformation">
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label for="priority" class="form-label">Priority Level:</label>
+                            <select class="form-select" name="priority" id="priority">
+                                <option value="low">Low</option>
+                                <option value="medium">Medium</option>
+                                <option value="high">High</option>
+                            </select>
+                        </div>
+
+                        <div class="text-center">
+                            <button type="submit" class="btn btn-primary btn-lg">Submit Report</button>
+                        </div>
+                    </form>
+                </div>
             </div>
-
-            <!-- Additional form fields -->
-            <div class="form-group">
-                <label for="location">Location:</label>
-                <input type="text" name="location" id="location" class="form-control" required>
-            </div>
-
-            <div class="form-group">
-                <label for="waste_type">Waste Type:</label>
-                <select name="waste_type" id="waste_type" class="form-control" required>
-                    <option value="plastic">Plastic</option>
-                    <option value="organic">Organic</option>
-                    <option value="hazardous">Hazardous</option>
-                    <option value="general">General</option>
-                    <option value="mixed-waste">Mixed-waste</option>
-                    <option value="unsorted">Unsorted Waste</option>
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label for="description">Description:</label>
-                <textarea name="description" id="description" class="form-control" rows="3" required></textarea>
-            </div>
-
-            <!-- Nearby Landmarks -->
-            <div class="form-group mt-3">
-                <label for="nearbyLandmarks">Nearby Landmarks</label>
-                <input type="text" id="nearbyLandmarks" class="form-control" placeholder="E.g., school, park, etc.">
-            </div>
-
-            <!-- Contact Information -->
-            <div class="form-group mt-3">
-                <label for="contactInformation">Contact Information</label>
-                <input type="text" id="contactInformation" class="form-control" placeholder="Phone number or email">
-            </div>
-
-            <div class="form-group">
-                <label for="priority">Priority Level:</label>
-                <select name="priority" id="priority" class="form-control" required>
-                    <option value="low">Low</option>
-                    <option value="medium">Medium</option>
-                    <option value="high">High</option>
-                </select>
-            </div>
-
-            <!-- Submit Button -->
-            <button type="submit" class="btn btn-success mt-4">Submit Report</button>
-        </form>
+        </div>
     </div>
 </div>
+
+<script src="{% static 'js/upload_photo.js' %}"></script>
 {% endblock %}
-
-{% block extra_scripts %}
-<!-- Use nonce for inline scripts -->
-<script nonce="{{ nonce }}">
-    // Your inline JavaScript here
-    console.log("This script is allowed by the CSP with nonce");
-</script>
-<script src="{% static 'js/upload_photo.js' %}" nonce="{{ nonce }}"></script>  <!-- Include JS file with nonce -->
-{% endblock %}
-
-
-
-
-
-
-
-
