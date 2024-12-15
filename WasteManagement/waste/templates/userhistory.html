@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<br>
+<h2 class="text-center mb-4">Your Report History</h2>
+
+<div class="container">
+    {% for report in history_data %}
+    <!-- Container for each report with alternating background colors -->
+    <div class="row mb-4 report-container" style="background-color: {% if forloop.counter|divisibleby:2 %}#f8f9fa{% else %}#ffffff{% endif %}; border: 1px solid #ddd; padding: 15px; border-radius: 8px;">
+        <!-- Left Section for Waste Type and Time Submitted -->
+        <div class="col-md-6">
+            <p><strong>Waste Type:</strong> {{ report.waste_type }}</p>
+            <p><strong>Time Submitted:</strong> {{ report.created_at|date:"M d, Y H:i" }}</p>
+            
+        </div>
+
+        <!-- Right Section for Status and Comments -->
+        <div class="col-md-6">
+            <p><strong>Status:</strong> {{ report.status }}</p>
+            
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+{% endblock %}
+

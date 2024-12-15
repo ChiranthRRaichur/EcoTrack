@@ -16,10 +16,24 @@
                         {% csrf_token %}
                         
                         <div class="form-group mb-3">
-                            <label for="photo" class="form-label">Choose Image:</label>
-                            <input type="file" class="form-control" name="photo" id="photo" required>
+                            <label class="form-label">Capture or Choose Image:</label>
+                            <div class="d-flex gap-2 mb-2">
+                                <button type="button" id="openCameraBtn" class="btn btn-success">
+                                    <i class="fas fa-camera"></i> Open Camera
+                                </button> &nbsp;&nbsp;
+                                <input type="file" class="form-control" name="photo" id="photo" accept="image/*" required>
+                            </div>
+                            
+                            <!-- Camera input for mobile and modern browsers -->
+                            <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display:none;">
+                            
+                            <!-- Image preview -->
+                            <div id="imagePreview" class="mt-2" style="display:none;">
+                                <img id="previewImage" src="#" alt="Image Preview" style="max-width:100%; max-height:300px;">
+                            </div>
                         </div>
 
+                        <!-- Rest of the previous form fields remain the same -->
                         <div class="form-group mb-3">
                             <label for="location" class="form-label">Location:</label>
                             <input type="text" class="form-control" name="location" id="location">
@@ -76,4 +90,49 @@
 </div>
 
 <script src="{% static 'js/upload_photo.js' %}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const openCameraBtn = document.getElementById('openCameraBtn');
+    const cameraInput = document.getElementById('cameraInput');
+    const photoInput = document.getElementById('photo');
+    const imagePreview = document.getElementById('imagePreview');
+    const previewImage = document.getElementById('previewImage');
+
+    // Trigger camera input when Open Camera button is clicked
+    openCameraBtn.addEventListener('click', function() {
+        cameraInput.click();
+    });
+
+    // Handle camera input change
+    cameraInput.addEventListener('change', function(event) {
+        const file = event.target.files[0];
+        if (file) {
+            // Update file input
+            photoInput.files = event.target.files;
+
+            // Create file reader to show preview
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                previewImage.src = e.target.result;
+                imagePreview.style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+
+    // Handle file input change (traditional file selection)
+    photoInput.addEventListener('change', function(event) {
+        const file = event.target.files[0];
+        if (file) {
+            // Create file reader to show preview
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                previewImage.src = e.target.result;
+                imagePreview.style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+});
+</script>
 {% endblock %}

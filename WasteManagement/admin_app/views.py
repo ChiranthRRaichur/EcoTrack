@@ -1,62 +1,95 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login
-from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.decorators import login_required
-from admin_app.models import WasteReportApproval
-from waste.models import WasteReport  # Assuming the WasteReport model contains user-submitted data
 from django.contrib import messages
-from django.http import HttpResponse
+from waste.models import WasteReport  # Importing WasteReport from the waste app
+from django.core.paginator import Paginator
+from .models import WasteReportStatus 
 
-
+# Admin Login
 def admin_login(request):
     if request.method == 'POST':
         username = request.POST['username']
         password = request.POST['password']
         user = authenticate(request, username=username, password=password)
         
-        if user is not None and user.is_staff:  # Ensure that the user is an admin
+        if user is not None and user.is_staff:
             login(request, user)
-            return redirect('admin_dashboard')  # Redirect to the admin dashboard
+            return redirect('admin_dashboard')
         else:
             messages.error(request, 'Invalid credentials or user not authorized as admin.')
             return redirect('admin_login')
     
     return render(request, 'admin_app/admin_login.html')
 
-
- # Fetch reports and include filtering based on approval status if needed
 @login_required
 def dashboard(request):
     if not request.user.is_staff:
-        return redirect('home')  # Redirect non-admin users to the home page
-    reports = WasteReportApproval.objects.all().order_by('-id')
-    return render(request, 'admin_app/admin_dashboard.html', {'reports': reports})
+        return redirect('home')
+
+    query = request.GET.get('q', '')
+    reports_list = WasteReport.objects.filter(
+        user__username__icontains=query
+    ) | WasteReport.objects.filter(
+        waste_type__icontains=query
+    )
+
+    # Paginate reports (10 per page)
+    paginator = Paginator(reports_list, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    # Fetch the status for each report using filter (to avoid DoesNotExist error)
+    report_statuses = {}
+    for report in page_obj:
+        try:
+            report_status = WasteReportStatus.objects.filter(report=report).latest('updated_at')
+            report_statuses[report.id] = report_status
+        except WasteReportStatus.DoesNotExist:
+            report_statuses[report.id] = None  # No status found, set it to None
+
+    return render(request, 'admin_app/admin_dashboard.html', {'page_obj': page_obj, 'report_statuses': report_statuses})
 
 
 
+@login_required
+def update_report_status(request, report_id):
+    if not request.user.is_staff:
+        return redirect('home')
+    
+    report = get_object_or_404(WasteReport, id=report_id)
+    
+    if request.method == 'POST':
+        new_status = request.POST.get('status')
+        comments = request.POST.get('comments', '')  # Optional comments
+        
+        if new_status in ['pending', 'in_progress', 'completed', 'rejected']:
+            # Create a new WasteReportStatus
+            WasteReportStatus.objects.create(report=report, status=new_status, comments=comments)
+            messages.success(request, 'Report status updated successfully.')
+        else:
+            messages.error(request, 'Invalid status selected.')
+    
+    return redirect('admin_dashboard')
+
+
+
+
+# Report Details View
+@login_required
 def report_detail(request, report_id):
-    report_approval = get_object_or_404(WasteReportApproval, id=report_id)
-    # Simulating blockchain check (to be replaced with actual logic)
-    is_duplicate = False  # Replace this with the logic to check for duplicate using blockchain
-    return render(request, 'admin_app/report_detail.html', {
-        'report_approval': report_approval,
-        'is_duplicate': is_duplicate
-    })
+    if not request.user.is_staff:
+        return redirect('home')  # Redirect non-admin users to the home page
+    
+    # Fetch the report from WasteReport in the waste app
+    report = get_object_or_404(WasteReport, id=report_id)
+    
+    if request.method == 'POST':
+        new_status = request.POST.get('status')
+        if new_status in ['pending', 'in_progress', 'completed', 'rejected']:
+            report.status = new_status  # Update the status
+            report.save()
+            messages.success(request, f"Report status updated to {new_status.capitalize()}.")
+            return redirect('admin_dashboard')  # Redirect to the dashboard after updating
 
-
-@login_required
-def approve_report(request, report_id):
-    report_approval = get_object_or_404(WasteReportApproval, id=report_id)
-    if request.method == 'POST' and request.POST['action'] == 'approve':
-        report_approval.status = 'Approved'
-        report_approval.points_awarded = 10  # Awarding points after approval
-        report_approval.save()
-    return redirect('admin_dashboard')  # Redirect back to the dashboard
-
-@login_required
-def reject_report(request, report_id):
-    report_approval = get_object_or_404(WasteReportApproval, id=report_id)
-    if request.method == 'POST' and request.POST['action'] == 'reject':
-        report_approval.status = 'Rejected'
-        report_approval.save()
-    return redirect('admin_dashboard')  # Redirect back to the dashboard
+    return render(request, 'admin_app/report_detail.html', {'report': report})

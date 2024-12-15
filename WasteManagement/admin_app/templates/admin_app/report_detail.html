@@ -1,17 +1,43 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<h2>Report Detail for {{ report_approval.report.user.username }}</h2>
-<p>Location: {{ report_approval.report.location }}</p>
-<p>Waste Type: {{ report_approval.report.waste_type }}</p>
-<p>Status: {{ report_approval.status }}</p>
-<p>Points Awarded: {{ report_approval.points_awarded }}</p>
+<div class="container mt-5">
+    <h2 class="text-center mb-4">Report Details for {{ report.user.username }}</h2>
 
-<img src="{{ report_approval.report.photo.url }}" alt="Uploaded Photo" width="300">
+    <div class="row">
+        <div class="col-md-6">
+            <p><strong>Location:</strong> {{ report.location }}</p>
+            <p><strong>Waste Type:</strong> {{ report.waste_type }}</p>
+            <p><strong>Description:</strong> {{ report.description }}</p>
+            <p><strong>Priority Level:</strong> {{ report.priority }}</p>
+            <p><strong>Contact Information:</strong> {{ report.contact_information }}</p>
+            <p><strong>Nearby Landmarks:</strong> {{ report.nearby_landmarks }}</p>
+            <p><strong>Latitude:</strong> {{ report.latitude }}</p>
+            <p><strong>Longitude:</strong> {{ report.longitude }}</p>
+            <p><strong>Status:</strong> {{ report.status }}</p>
+        </div>
+        <div class="col-md-6">
+            <!-- Optionally display the photo -->
+            {% if report.photo %}
+                <div class="text-center">
+                    <img src="{{ report.photo.url }}" alt="Waste Photo" class="img-fluid rounded" style="max-width: 100%; max-height: 300px;">
+                </div>
+            {% endif %}
+        </div>
+    </div>
 
-<form method="POST">
-    {% csrf_token %}
-    <button type="submit" name="action" value="approve">Approve</button>
-    <button type="submit" name="action" value="reject">Reject</button>
-</form>
+    <div class="mt-4">
+        <form action="{% url 'update_report_status' report.id %}" method="post">
+            {% csrf_token %}
+            <select name="status" class="form-control status-select">
+                <option value="pending" {% if report.status == 'pending' %}selected{% endif %}>Pending</option>
+                <option value="in_progress" {% if report.status == 'in_progress' %}selected{% endif %}>In Progress</option>
+                <option value="completed" {% if report.status == 'completed' %}selected{% endif %}>Completed</option>
+                <option value="rejected" {% if report.status == 'rejected' %}selected{% endif %}>Rejected</option>
+            </select>
+            <button type="submit" class="btn btn-success mt-3">Done</button>
+        </form>
+        <a href="{% url 'admin_dashboard' %}" class="btn btn-primary mt-3">Back to Dashboard</a>
+    </div>
+</div>
 {% endblock %}

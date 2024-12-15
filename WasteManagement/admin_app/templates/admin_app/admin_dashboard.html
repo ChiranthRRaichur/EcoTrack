@@ -1,7 +1,23 @@
-{% extends 'base.html' %}0000
+{% extends 'base.html' %}
+{% load custom_filters %}  <!-- Load the custom filter -->
 
 {% block content %}
-<h2 class="text-center mb-4">Admin Dashboard</h2>
+<br>
+<h2 class="text-center mb-4">Admin Dashboard - Waste Reports</h2>
+
+<!-- Search Form -->
+<div class="container">
+    <div class="row justify-content-center mb-4">
+        <div class="col-md-6">
+            <form method="GET" class="d-flex">
+                <input type="text" name="q" class="form-control" placeholder="Search by username or waste type" value="{{ request.GET.q }}">
+                <button type="submit" class="btn btn-primary ml-2">Search</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Report Table -->
 <div class="container">
     <table class="table table-bordered table-striped">
         <thead class="thead-dark">
@@ -14,98 +30,44 @@
             </tr>
         </thead>
         <tbody>
-            {% for report in reports %}
+            {% for report in page_obj %}
             <tr>
-                <td>{{ report.report.user.username }}</td>
-                <td>{{ report.report.created_at }}</td>
-                <td>{{ report.report.waste_type }}</td>
-                <td>{{ report.status }}</td>
+                <td>{{ report.user.username }}</td>
+                <td>{{ report.created_at|date:"M d, Y H:i" }}</td>
+                <td>{{ report.waste_type }}</td>
                 <td>
-                    <a href="{% url 'report_detail' report.id %}" class="btn btn-info btn-sm">View</a>
-                    <a href="{% url 'approve_report' report.id %}" class="btn btn-success btn-sm">Approve</a>
-                    <a href="{% url 'reject_report' report.id %}" class="btn btn-danger btn-sm">Reject</a>
+                    {% with report_status=report_statuses|get_item:report.id %}
+                        {% if report_status %}
+                            {{ report_status.status }} - {{ report_status.comments }}
+                        {% else %}
+                            No status available
+                        {% endif %}
+                    {% endwith %}
+                </td>
+                <td>
+                    <a href="{% url 'report_detail' report.id %}" class="btn btn-info btn-sm">View Report</a>
                 </td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
+
+    <!-- Pagination Controls -->
+    <div class="pagination">
+        <span class="step-links">
+            {% if page_obj.has_previous %}
+                <a href="?page=1">&laquo; first</a>
+                <a href="?page={{ page_obj.previous_page_number }}">previous</a>
+            {% endif %}
+            <span class="current">
+                Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+            </span>
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}">next</a>
+                <a href="?page={{ page_obj.paginator.num_pages }}">last &raquo;</a>
+            {% endif %}
+        </span>
+    </div>
 </div>
-{% endblock %}
 
-{% block extra_styles %}
-<style>
-    /* Dashboard title */
-    h2 {
-        font-size: 2rem;
-        color: #4CAF50;
-        margin-bottom: 20px;
-    }
-
-    /* Container for the dashboard */
-    .container {
-        max-width: 90%;
-        margin: 0 auto;
-    }
-
-    /* Table styling */
-    table {
-        width: 100%;
-        margin-top: 30px;
-        border-collapse: collapse;
-    }
-
-    th, td {
-        padding: 12px;
-        text-align: center;
-    }
-
-    /* Table header styling */
-    th {
-        background-color: #343a40;
-        color: white;
-    }
-
-    /* Table row styling */
-    tr:nth-child(even) {
-        background-color: #f9f9f9;
-    }
-
-    tr:nth-child(odd) {
-        background-color: #ffffff;
-    }
-
-    /* Action button styling */
-    .btn {
-        padding: 6px 12px;
-        border-radius: 5px;
-        text-decoration: none;
-    }
-
-    /* View button */
-    .btn-info {
-        background-color: #17a2b8;
-        color: white;
-    }
-    .btn-info:hover {
-        background-color: #138496;
-    }
-
-    /* Approve button */
-    .btn-success {
-        background-color: #28a745;
-        color: white;
-    }
-    .btn-success:hover {
-        background-color: #218838;
-    }
-
-    /* Reject button */
-    .btn-danger {
-        background-color: #dc3545;
-        color: white;
-    }
-    .btn-danger:hover {
-        background-color: #c82333;
-    }
-</style>
 {% endblock %}
