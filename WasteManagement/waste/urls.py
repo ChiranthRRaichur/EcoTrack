@@ -12,6 +12,7 @@ urlpatterns = [
     path('upload-photo/', views.upload_photo, name='upload_photo'),
     path('score-board/', views.score_board, name='score_board'),
     path('user-history/', views.user_history, name='user_history'),
+    path('submit-report/', views.submit_report, name='submit_report'),
 ]
 
 

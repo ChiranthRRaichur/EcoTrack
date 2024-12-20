@@ -6,4 +6,6 @@ urlpatterns = [
     path('dashboard/', views.dashboard, name='admin_dashboard'),
     path('report/<int:report_id>/', views.report_detail, name='report_detail'),
     path('report/<int:report_id>/update-status/', views.update_report_status, name='update_report_status'),
+    path('analytics/', views.analytics_dashboard, name='analytics_dashboard'),
+
 ]

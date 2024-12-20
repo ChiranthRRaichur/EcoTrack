@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <div class="container">
+        <h2 class="text-center mb-4">Analytics Dashboard</h2>
+
+        <!-- Waste Type Distribution Chart -->
+        <div class="row">
+            <div class="col-md-6">
+                <canvas id="wasteTypeDistributionChart"></canvas>
+            </div>
+            
+            <!-- High-Report Areas Map -->
+            <div class="col-md-6">
+                <div id="map" style="height: 400px;"></div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block extra_scripts %}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet-heat/dist/leaflet-heat.js"></script>
+
+    <script>
+        // Data for Waste Type Distribution Chart (Pie Chart)
+        const wasteTypesData = {
+            labels: [{% for waste in waste_types %}"{{ waste.waste_type }}"{% if not forloop.last %}, {% endif %}{% endfor %}],
+            datasets: [{
+                label: 'Waste Type Distribution',
+                data: [{% for waste in waste_types %}{{ waste.count }}{% if not forloop.last %}, {% endif %}{% endfor %}],
+                backgroundColor: ['#FF5733', '#33FF57', '#3357FF', '#FF33A6'],
+            }]
+        };
+
+        const wasteTypeConfig = {
+            type: 'pie',
+            data: wasteTypesData,
+        };
+
+        const wasteTypeDistributionChart = new Chart(
+            document.getElementById('wasteTypeDistributionChart'),
+            wasteTypeConfig
+        );
+
+        // Initializing the Leaflet Map for Waste Hotspots
+        const map = L.map('map').setView([12.9716, 77.5946], 10);  // Set initial position (e.g., Bangalore)
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+
+        // Prepare data for heatmap (from latitude and longitude)
+        const heatData = [
+            {% for hotspot in waste_hotspots %}
+                [{{ hotspot.latitude }}, {{ hotspot.longitude }}],
+            {% endfor %}
+        ];
+
+        // Add heatmap layer to the map
+        L.heatLayer(heatData, { radius: 25 }).addTo(map);
+    </script>
+{% endblock %}

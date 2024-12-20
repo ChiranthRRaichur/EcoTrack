@@ -93,3 +93,20 @@ def report_detail(request, report_id):
             return redirect('admin_dashboard')  # Redirect to the dashboard after updating
 
     return render(request, 'admin_app/report_detail.html', {'report': report})
+
+from django.db.models import Count
+
+def analytics_dashboard(request):
+    # Fetch waste type distribution
+    waste_types = WasteReport.objects.values('waste_type')\
+        .annotate(count=Count('id'))\
+        .order_by('waste_type')
+
+    # Fetch waste hotspots (latitude, longitude) and count
+    waste_hotspots = WasteReport.objects.values('latitude', 'longitude')\
+        .annotate(count=Count('id'))
+
+    return render(request, 'admin_app/analytics_dashboard.html', {
+        'waste_types': waste_types,
+        'waste_hotspots': waste_hotspots
+    })
