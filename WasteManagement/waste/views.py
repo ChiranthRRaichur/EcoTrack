@@ -315,3 +315,52 @@ def submit_report(request):
             return redirect('submit_report')
 
     return render(request, 'submit_report.html')
+
+
+
+
+def add_waste_data():
+    print("Simulating adding data to Hyperledger Fabric...")
+    print("Data added:")
+
+# Dummy function to query waste data
+def query_waste_data(waste_id):
+    print(f"Simulating querying data for waste ID: {waste_id}")
+    print("Queried data:")
+
+# Dummy function to detect duplicate reports
+def detect_duplicate_report(new_report):
+    print("Simulating checking for duplicate reports...")
+    existing_reports = [
+        {
+            "id": "1",
+            "location": "Bengaluru",
+            "description": "Overflowing garbage bin",
+            "timestamp": "2024-12-20T15:00:00Z",
+            "reported_by": "User456"
+        }
+    ]
+
+    for report in existing_reports:
+        if report["location"] == new_report["location"] and report["description"] == new_report["description"]:
+            print("Duplicate report detected:", report)
+            return True
+
+    print("No duplicate report found.")
+    return False
+
+# Demonstrate adding, querying, and detecting duplicate waste data
+if __name__ == "__main__":
+    print("Adding data to Hyperledger Fabric...")
+    add_waste_data()
+
+    print("\nQuerying data from Hyperledger Fabric...")
+    query_waste_data("1")
+
+    print("\nDetecting duplicate reports...")
+    duplicate_found = detect_duplicate_report()
+    if duplicate_found:
+        print("Duplicate report exists.")
+    else:
+        print("Report is unique.")
+
