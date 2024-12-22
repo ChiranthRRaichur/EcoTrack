@@ -24,9 +24,10 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'waste',
+    # 'waste',
     'admin_app',
     'csp',
+    'waste.apps.WasteConfig',
 ]
 
 MIDDLEWARE = [

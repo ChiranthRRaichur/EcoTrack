@@ -11,7 +11,7 @@ from django.views.decorators.csrf import csrf_exempt
 from .forms import LoginForm, SignupForm
 from .models import WasteReport, CustomUser
 from admin_app.models import WasteReportStatus
-
+from .utils import get_image_hash, haversine
 
 # Utility Functions
 def haversine(lat1, lon1, lat2, lon2):
@@ -116,14 +116,6 @@ def user_history(request):
     return render(request, 'userhistory.html', {'history_data': history_data})
 
 
-# waste/views.py
-from django.shortcuts import render, redirect
-from django.contrib.auth.decorators import login_required
-from django.views.decorators.csrf import csrf_exempt
-from django.http import JsonResponse
-from django.contrib import messages
-from .models import WasteReport, CustomUser
-from .utils import sync_user_points, get_image_hash, haversine
 
 @login_required
 def score_board(request):
@@ -133,73 +125,76 @@ def score_board(request):
     users = CustomUser.objects.all().order_by('-points')
     return render(request, 'score_board.html', {'users': users})
 
+@login_required
+def submit_report(request):
+    """
+    Handles waste report submission with global duplicate detection and scoring.
+    """
+    if request.method == 'POST':
+        try:
+            photo = request.FILES.get('photo')
+            location = request.POST.get('location')
+            latitude = float(request.POST.get('latitude'))
+            longitude = float(request.POST.get('longitude'))
+            waste_type = request.POST.get('waste_type', 'General')  # Default to "General" if not provided
 
-# @login_required
-# @csrf_exempt
-# def upload_photo(request):
-#     """
-#     Handles photo uploads for waste reports, including global duplicate detection and point calculation.
-#     """
-#     if request.method == 'POST':
-#         try:
-#             location = request.POST.get('location', 'Unknown Location')
-#             latitude = float(request.POST.get('latitude'))
-#             longitude = float(request.POST.get('longitude'))
-#             waste_type = request.POST.get('waste_type', 'General')  # Default to "General" if not provided
-#             photo = request.FILES.get('photo')
+            if not all([photo, location, latitude, longitude, waste_type]):
+                return HttpResponseRedirect(
+                    f"{reverse('submission_status')}?alert_type=danger&message=All+fields+are+required+to+submit+the+report."
+                )
 
-#             if not photo:
-#                 return JsonResponse({'error': 'No photo uploaded'}, status=400)
+            # Generate hash for the photo
+            photo_hash = get_image_hash(photo)
 
-#             # Generate hash for the uploaded photo
-#             photo_hash = get_image_hash(photo)
+            # Track global duplicate submissions
+            duplicate_reports = WasteReport.objects.filter(photo_hash=photo_hash)
+            submission_count = 0
 
-#             # Track global duplicate submissions
-#             duplicate_reports = WasteReport.objects.filter(photo_hash=photo_hash)
-#             submission_count = 0
+            for report in duplicate_reports:
+                distance = haversine(latitude, longitude, report.latitude, report.longitude)
+                if distance < 20:  # Check proximity within 20 meters
+                    submission_count += 1
 
-#             for report in duplicate_reports:
-#                 distance = haversine(latitude, longitude, report.latitude, report.longitude)
-#                 if distance < 20:  # Check proximity within 20 meters
-#                     submission_count += 1
+            # Handle response based on global submission count
+            if submission_count >= 2:
+                return HttpResponseRedirect(
+                    f"{reverse('submission_status')}?alert_type=warning&message=This+report+has+already+been+submitted+twice+globally.+Further+duplicates+are+not+allowed."
+                )
+            elif submission_count == 1:
+                points_awarded = 5
+                message = f"Duplicate report submitted successfully! You earned {points_awarded} points."
+            else:
+                points_awarded = 10
+                message = f"Report submitted successfully! You earned {points_awarded} points."
 
-#             # Handle response based on global submission count
-#             if submission_count >= 2:
-#                 return JsonResponse({
-#                     'message': 'This report has already been submitted twice globally. Further duplicates are not allowed.'
-#                 }, status=400)
-#             elif submission_count == 1:
-#                 points_awarded = 5
-#             else:
-#                 points_awarded = 10
+            # Create the new report
+            WasteReport.objects.create(
+                user=request.user,
+                photo=photo,
+                photo_hash=photo_hash,
+                location=location,
+                waste_type=waste_type,
+                latitude=latitude,
+                longitude=longitude
+            )
 
-#             # Create the new report
-#             WasteReport.objects.create(
-#                 user=request.user,
-#                 photo=photo,
-#                 photo_hash=photo_hash,
-#                 location=location,
-#                 waste_type=waste_type,  # Save the waste type
-#                 latitude=latitude,
-#                 longitude=longitude
-#             )
+            # Update user points
+            request.user.points += points_awarded
+            request.user.save()
 
-#             # Update user points
-#             request.user.points += points_awarded
-#             request.user.save()
+            # Redirect with success message
+            return HttpResponseRedirect(
+                f"{reverse('submission_status')}?alert_type=success&message={message.replace(' ', '+')}"
+            )
 
-#             return JsonResponse({
-#                 'message': f'Report submitted successfully! You earned {points_awarded} points.',
-#                 'total_points': request.user.points
-#             }, status=201)
+        except Exception as e:
+            # Redirect with error message
+            return HttpResponseRedirect(
+                f"{reverse('submission_status')}?alert_type=danger&message=Error:+{str(e).replace(' ', '+')}"
+            )
 
-#         except Exception as e:
-#             return JsonResponse({'error': str(e)}, status=500)
-
-#     elif request.method == 'GET':
-#         return render(request, 'upload_photo.html')
-
-#     return JsonResponse({'error': 'Invalid request method'}, status=405)
+    # Redirect GET requests to `upload_photo`
+    return HttpResponseRedirect(reverse('upload_photo'))
 
 
 # @login_required
@@ -265,66 +260,54 @@ def score_board(request):
 #     return render(request, 'submit_report.html')
 
 
+from django.http import HttpResponseRedirect
+from django.urls import reverse
+
 @login_required
 @csrf_exempt
 def upload_photo(request):
     """
-    Handles photo uploads for waste reports.
+    Handles photo uploads for waste reports, including global duplicate detection and point calculation.
     """
     if request.method == 'POST':
         try:
             location = request.POST.get('location', 'Unknown Location')
             latitude = float(request.POST.get('latitude'))
             longitude = float(request.POST.get('longitude'))
-            waste_type = request.POST.get('waste_type', 'General')
+            waste_type = request.POST.get('waste_type', 'General')  # Default to "General" if not provided
             photo = request.FILES.get('photo')
 
             if not photo:
-                return JsonResponse({'error': 'No photo uploaded'}, status=400)
+                # Redirect with error message
+                return HttpResponseRedirect(
+                    f"{reverse('submission_status')}?alert_type=danger&message=No+photo+uploaded."
+                )
 
+            # Generate hash for the uploaded photo
             photo_hash = get_image_hash(photo)
 
-            # Create the new report - points will be synced by signal
-            report = WasteReport.objects.create(
-                user=request.user,
-                photo=photo,
-                photo_hash=photo_hash,
-                location=location,
-                waste_type=waste_type,
-                latitude=latitude,
-                longitude=longitude
-            )
+            # Track global duplicate submissions
+            duplicate_reports = WasteReport.objects.filter(photo_hash=photo_hash)
+            submission_count = 0
 
-            return JsonResponse({
-                'message': 'Report submitted successfully!',
-                'total_points': request.user.points
-            }, status=201)
+            for report in duplicate_reports:
+                distance = haversine(latitude, longitude, report.latitude, report.longitude)
+                if distance < 20:  # Check proximity within 20 meters
+                    submission_count += 1
 
-        except Exception as e:
-            return JsonResponse({'error': str(e)}, status=500)
+            # Handle response based on global submission count
+            if submission_count >= 2:
+                return HttpResponseRedirect(
+                    f"{reverse('submission_status')}?alert_type=warning&message=This+report+has+already+been+submitted+twice+globally.+Further+duplicates+are+not+allowed."
+                )
+            elif submission_count == 1:
+                points_awarded = 5
+                message = f"Duplicate report submitted successfully! You earned {points_awarded} points."
+            else:
+                points_awarded = 10
+                message = f"Report submitted successfully! You earned {points_awarded} points."
 
-    return render(request, 'upload_photo.html')
-
-@login_required
-def submit_report(request):
-    """
-    Handles waste report submission.
-    """
-    if request.method == 'POST':
-        try:
-            photo = request.FILES.get('photo')
-            location = request.POST.get('location')
-            latitude = float(request.POST.get('latitude'))
-            longitude = float(request.POST.get('longitude'))
-            waste_type = request.POST.get('waste_type', 'General')
-
-            if not all([photo, location, latitude, longitude, waste_type]):
-                messages.error(request, "All fields are required.")
-                return redirect('submit_report')
-
-            photo_hash = get_image_hash(photo)
-
-            # Create the new report - points will be synced by signal
+            # Create the new report
             WasteReport.objects.create(
                 user=request.user,
                 photo=photo,
@@ -335,14 +318,31 @@ def submit_report(request):
                 longitude=longitude
             )
 
-            messages.success(request, f"Report submitted successfully! Your total points: {request.user.points}")
-            return redirect('user_history')
+            # Update user points
+            request.user.points += points_awarded
+            request.user.save()
+
+            # Redirect with success message
+            return HttpResponseRedirect(
+                f"{reverse('submission_status')}?alert_type=success&message={message.replace(' ', '+')}"
+            )
 
         except Exception as e:
-            messages.error(request, f"Error submitting report: {str(e)}")
-            return redirect('submit_report')
+            # Redirect with error message
+            return HttpResponseRedirect(
+                f"{reverse('submission_status')}?alert_type=danger&message=Error:+{str(e).replace(' ', '+')}"
+            )
 
-    return render(request, 'submit_report.html')
+    return render(request, 'upload_photo.html')
+
+@login_required
+def submission_status(request):
+    """
+    Renders the submission status page with dynamic messages.
+    """
+    alert_type = request.GET.get('alert_type', 'info')  # Default to 'info' if not provided
+    message = request.GET.get('message', 'No status available.')
+    return render(request, 'submission_status.html', {'alert_type': alert_type, 'message': message})
 
 
 # def add_waste_data():
@@ -389,4 +389,3 @@ def submit_report(request):
 #         print("Duplicate report exists.")
 #     else:
 #         print("Report is unique.")
-

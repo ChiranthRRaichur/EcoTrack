@@ -11,6 +11,7 @@ urlpatterns = [
     path('score-board/', views.score_board, name='score_board'),
     path('user-history/', views.user_history, name='user_history'),
     path('submit-report/', views.submit_report, name='submit_report'),
+    path('submission-status/', views.submission_status, name='submission_status'),
 ]
 
 

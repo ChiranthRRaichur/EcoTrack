@@ -1,12 +1,35 @@
 # waste/utils.py
-from waste.models import WasteReport
-from waste.views import haversine
+import math
+import imagehash
+from PIL import Image
+from django.db.models import Count
 
+def haversine(lat1, lon1, lat2, lon2):
+    """
+    Calculate the great-circle distance between two points on Earth.
+    """
+    R = 6371  # Radius of the Earth in kilometers
+    lat1, lon1, lat2, lon2 = map(math.radians, [lat1, lon1, lat2, lon2])
+    dlat = lat2 - lat1
+    dlon = lon2 - lon1
+    a = math.sin(dlat / 2) ** 2 + math.cos(lat1) * math.cos(lat2) * math.sin(dlon / 2) ** 2
+    c = 2 * math.asin(math.sqrt(a))
+    return R * c * 1000  # Convert to meters
+
+def get_image_hash(image_file):
+    """
+    Generate a hash for the given image using perceptual hashing.
+    """
+    image = Image.open(image_file)
+    return str(imagehash.phash(image))
 
 def sync_user_points(user):
     """
     Recalculates and updates user points based on their waste reports.
     """
+    # Import here to avoid circular import
+    from waste.models import WasteReport
+    
     # Get all reports for the user
     user_reports = WasteReport.objects.filter(user=user)
     
