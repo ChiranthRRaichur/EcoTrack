@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% load custom_filters %}  <!-- Load the custom filter -->
+{% load custom_filters %}
 
 {% block content %}
 <br>
@@ -12,6 +12,8 @@
             <form method="GET" class="d-flex">
                 <input type="text" name="q" class="form-control" placeholder="Search by username or waste type" value="{{ request.GET.q }}">
                 <button type="submit" class="btn btn-primary ml-2">Search</button>
+                <!-- New Button for Analytics Dashboard -->
+                <a href="{% url 'analytics_dashboard' %}" class="btn btn-secondary ml-2">Analytics Dashboard</a>
             </form>
         </div>
     </div>

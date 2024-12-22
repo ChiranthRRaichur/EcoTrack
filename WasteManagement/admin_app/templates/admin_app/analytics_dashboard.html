@@ -1,64 +1,316 @@
 {% extends 'base.html' %}
-
 {% block content %}
-    <div class="container">
-        <h2 class="text-center mb-4">Analytics Dashboard</h2>
+<div class="dashboard-container">
+    <style>
+        /* Dashboard Container */
+        .dashboard-container {
+            padding: 2rem;
+            background: #f8fafc;
+            min-height: 100vh;
+        }
+
+        /* Dashboard Header */
+        .dashboard-header {
+            margin-bottom: 3rem;
+            text-align: center;
+            padding-bottom: 1.5rem;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        .dashboard-title {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 0.5rem;
+        }
+
+        .dashboard-subtitle {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            font-size: 1.1rem;
+            color: #64748b;
+        }
+
+        /* Charts Grid */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        /* Chart Cards */
+        .chart-card {
+            background: white;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            padding: 1.5rem;
+            transition: transform 0.2s ease-in-out;
+        }
+
+        .chart-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .chart-title {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #334155;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        /* Map Container */
+        .map-container {
+            background: white;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            padding: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .map-title {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #334155;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        #scatterMap {
+            height: 500px;
+            width: 100%;
+            border-radius: 0.5rem;
+            overflow: hidden;
+        }
+
+        /* Custom Leaflet Popup Styling */
+        .leaflet-popup-content-wrapper {
+            border-radius: 0.5rem;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        .leaflet-popup-content {
+            margin: 0.8rem 1rem;
+        }
+
+        .map-popup {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        .map-popup-title {
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 0.25rem;
+        }
+
+        .map-popup-content {
+            color: #64748b;
+            font-size: 0.9rem;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .dashboard-container {
+                padding: 1rem;
+            }
+
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .dashboard-title {
+                font-size: 2rem;
+            }
+        }
+    </style>
+
+    <!-- Dashboard Header -->
+    <header class="dashboard-header">
+        <h1 class="dashboard-title">Analytics Dashboard</h1>
+        <p class="dashboard-subtitle">Waste Management Statistical Overview</p>
+    </header>
+
+    <!-- Charts Grid -->
+    <div class="charts-grid">
+        <!-- User Contributions Chart -->
+        <div class="chart-card">
+            <h3 class="chart-title">User Contributions</h3>
+            <canvas id="userPieChart"></canvas>
+        </div>
 
         <!-- Waste Type Distribution Chart -->
-        <div class="row">
-            <div class="col-md-6">
-                <canvas id="wasteTypeDistributionChart"></canvas>
-            </div>
-            
-            <!-- High-Report Areas Map -->
-            <div class="col-md-6">
-                <div id="map" style="height: 400px;"></div>
-            </div>
+        <div class="chart-card">
+            <h3 class="chart-title">Waste Type Distribution</h3>
+            <canvas id="wasteBarChart"></canvas>
         </div>
     </div>
-{% endblock %}
 
-{% block extra_scripts %}
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-    <script src="https://unpkg.com/leaflet-heat/dist/leaflet-heat.js"></script>
+    <!-- Map Section -->
+    <div class="map-container">
+        <h3 class="map-title">Geographic Distribution of Reports</h3>
+        <div id="scatterMap"></div>
+    </div>
+</div>
 
-    <script>
-        // Data for Waste Type Distribution Chart (Pie Chart)
-        const wasteTypesData = {
-            labels: [{% for waste in waste_types %}"{{ waste.waste_type }}"{% if not forloop.last %}, {% endif %}{% endfor %}],
+<!-- JavaScript -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+
+<script>
+    // Chart.js Defaults
+    Chart.defaults.font.family = "'Inter', -apple-system, BlinkMacSystemFont, sans-serif";
+    Chart.defaults.font.size = 13;
+    Chart.defaults.plugins.legend.position = 'bottom';
+
+    // Pie Chart: User Contributions
+    const userContributions = {{ user_contributions|safe }};
+    const usernames = userContributions.map(data => data.user__username);
+    const userCounts = userContributions.map(data => data.contribution_count);
+    
+    const userPieCtx = document.getElementById('userPieChart').getContext('2d');
+    new Chart(userPieCtx, {
+        type: 'pie',
+        data: {
+            labels: usernames,
             datasets: [{
-                label: 'Waste Type Distribution',
-                data: [{% for waste in waste_types %}{{ waste.count }}{% if not forloop.last %}, {% endif %}{% endfor %}],
-                backgroundColor: ['#FF5733', '#33FF57', '#3357FF', '#FF33A6'],
+                data: userCounts,
+                backgroundColor: [
+                    '#60a5fa',
+                    '#34d399',
+                    '#f472b6',
+                    '#fbbf24',
+                    '#a78bfa',
+                    '#f87171',
+                    '#818cf8'
+                ],
+                borderWidth: 2,
+                borderColor: '#ffffff'
             }]
-        };
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'bottom',
+                    labels: {
+                        padding: 20,
+                        usePointStyle: true,
+                        pointStyle: 'circle'
+                    }
+                }
+            }
+        }
+    });
 
-        const wasteTypeConfig = {
-            type: 'pie',
-            data: wasteTypesData,
-        };
+    // Bar Chart: Waste Type Distribution
+    const wasteTypeDistribution = {{ waste_type_distribution|safe }};
+    const wasteTypes = wasteTypeDistribution.map(data => data.waste_type);
+    const wasteCounts = wasteTypeDistribution.map(data => data.count);
+    
+    const wasteBarCtx = document.getElementById('wasteBarChart').getContext('2d');
+    new Chart(wasteBarCtx, {
+        type: 'bar',
+        data: {
+            labels: wasteTypes,
+            datasets: [{
+                label: 'Number of Reports',
+                data: wasteCounts,
+                backgroundColor: 'rgba(96, 165, 250, 0.7)',
+                borderColor: 'rgb(59, 130, 246)',
+                borderWidth: 2,
+                borderRadius: 6
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        display: true,
+                        color: 'rgba(0, 0, 0, 0.05)'
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    }
+                }
+            }
+        }
+    });
 
-        const wasteTypeDistributionChart = new Chart(
-            document.getElementById('wasteTypeDistributionChart'),
-            wasteTypeConfig
-        );
+    // Scatter Map
+    const locations = {{ location_data|safe }};
+    const latitudes = locations.map(location => location.latitude);
+    const longitudes = locations.map(location => location.longitude);
 
-        // Initializing the Leaflet Map for Waste Hotspots
-        const map = L.map('map').setView([12.9716, 77.5946], 10);  // Set initial position (e.g., Bangalore)
+    // Calculate map bounds and center
+    const bounds = [
+        [Math.min(...latitudes), Math.min(...longitudes)],
+        [Math.max(...latitudes), Math.max(...longitudes)]
+    ];
+    const centerLat = (bounds[0][0] + bounds[1][0]) / 2;
+    const centerLon = (bounds[0][1] + bounds[1][1]) / 2;
 
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        }).addTo(map);
+    // Initialize map
+    const scatterMap = L.map('scatterMap', {
+        center: [centerLat, centerLon],
+        zoom: 15,
+        scrollWheelZoom: true,
+    });
 
-        // Prepare data for heatmap (from latitude and longitude)
-        const heatData = [
-            {% for hotspot in waste_hotspots %}
-                [{{ hotspot.latitude }}, {{ hotspot.longitude }}],
-            {% endfor %}
-        ];
+    // Add tile layer with styled maps
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors',
+        maxZoom: 19,
+        minZoom: 12,
+    }).addTo(scatterMap);
 
-        // Add heatmap layer to the map
-        L.heatLayer(heatData, { radius: 25 }).addTo(map);
-    </script>
+    // Custom popup style
+    const customPopup = (username, wasteType) => {
+        return `
+            <div class="map-popup">
+                <div class="map-popup-title">${username}</div>
+                <div class="map-popup-content">Waste Type: ${wasteType}</div>
+            </div>
+        `;
+    };
+
+    // Add markers with custom icons and popups
+    locations.forEach(location => {
+        if (location.latitude && location.longitude) {
+            const marker = L.marker([location.latitude, location.longitude])
+                .bindPopup(customPopup(location.user__username, location.waste_type))
+                .addTo(scatterMap);
+            
+            // Add hover effect
+            marker.on('mouseover', function (e) {
+                this.openPopup();
+            });
+        }
+    });
+
+    // Fit map to bounds
+    scatterMap.fitBounds(bounds);
+
+    // Ensure map renders correctly
+    setTimeout(() => {
+        scatterMap.invalidateSize();
+    }, 500);
+</script>
 {% endblock %}

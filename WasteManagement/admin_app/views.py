@@ -4,7 +4,15 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from waste.models import WasteReport  # Importing WasteReport from the waste app
 from django.core.paginator import Paginator
-from .models import WasteReportStatus 
+from .models import WasteReportStatus
+from admin_app import models 
+from django.contrib import messages
+from waste.models import WasteReport, CustomUser
+from waste.utils import sync_user_points
+from django.contrib.auth.decorators import user_passes_test
+
+def is_admin(user):
+    return user.is_authenticated and user.is_superuser
 
 # Admin Login
 def admin_login(request):
@@ -94,19 +102,56 @@ def report_detail(request, report_id):
 
     return render(request, 'admin_app/report_detail.html', {'report': report})
 
+
 from django.db.models import Count
+from django.shortcuts import render
+from .models import WasteReport
+
+
+# @login_required
+# def analytics_dashboard(request):
+#     """
+#     Analytics dashboard showing insights for waste type distribution and scatter map.
+#     """
+#     # User Contributions
+#     user_contributions = (
+#         WasteReport.objects.values('user__username')
+#         .annotate(contribution_count=Count('id'))
+#         .order_by('-contribution_count')
+#     )
+
+#     # Waste Type Distribution
+#     waste_type_distribution = (
+#         WasteReport.objects.values('waste_type')
+#         .annotate(count=Count('id'))
+#         .order_by('-count')
+#     )
+
+#     # Collect latitudes and longitudes for scatter map
+#     location_data = list(
+#         WasteReport.objects.values('latitude', 'longitude', 'location', 'waste_type')
+#     )
+
+#     context = {
+#         'user_contributions': list(user_contributions),
+#         'waste_type_distribution': list(waste_type_distribution),
+#         'location_data': location_data,
+#     }
+#     return render(request, 'admin_app/analytics_dashboard.html', context)
 
 def analytics_dashboard(request):
-    # Fetch waste type distribution
-    waste_types = WasteReport.objects.values('waste_type')\
-        .annotate(count=Count('id'))\
-        .order_by('waste_type')
+    # User Contributions
+    user_contributions = WasteReport.objects.values('user__username').annotate(contribution_count=Count('id'))
 
-    # Fetch waste hotspots (latitude, longitude) and count
-    waste_hotspots = WasteReport.objects.values('latitude', 'longitude')\
-        .annotate(count=Count('id'))
+    # Waste Type Distribution
+    waste_type_distribution = WasteReport.objects.values('waste_type').annotate(count=Count('id'))
 
-    return render(request, 'admin_app/analytics_dashboard.html', {
-        'waste_types': waste_types,
-        'waste_hotspots': waste_hotspots
-    })
+    # Location Data (Latitude and Longitude)
+    location_data = WasteReport.objects.values('latitude', 'longitude', 'user__username', 'waste_type')
+
+    context = {
+        'user_contributions': list(user_contributions),
+        'waste_type_distribution': list(waste_type_distribution),
+        'location_data': list(location_data),
+    }
+    return render(request, 'admin_app/analytics_dashboard.html', context)
