@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+<!-- {% extends 'base.html' %}
 {% load static %}
 
 {% block title %}Upload Photo{% endblock %}
@@ -24,21 +24,21 @@
                                 <input type="file" class="form-control" name="photo" id="photo" accept="image/*" required>
                             </div>
                             
-                            <!-- Camera input for mobile and modern browsers -->
+                            
                             <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display:none;">
                             
-                            <!-- Image preview -->
+                          
                             <div id="imagePreview" class="mt-2" style="display:none;">
                                 <img id="previewImage" src="#" alt="Image Preview" style="max-width:100%; max-height:300px;">
                             </div>
                         </div>
 
-                        <!-- Rest of the previous form fields remain the same -->
+                     
                         <div class="form-group mb-3">
                             <label for="location" class="form-label">Location:</label>
                             <input type="text" class="form-control" name="location" id="location">
                             
-                            <!-- Hidden inputs for latitude and longitude -->
+                           
                             <input type="hidden" name="latitude" id="latitude">
                             <input type="hidden" name="longitude" id="longitude">
                         </div>
@@ -135,4 +135,182 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 </script>
+{% endblock %} -->
+
+
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Upload Photo{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h2 class="text-center mb-0">Upload Waste Photo</h2>
+                </div>
+                <div class="card-body">
+                    <form id="uploadForm" method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        
+                        <div class="form-group mb-3">
+                            <label class="form-label">Capture or Choose Image:</label>
+                            <div class="d-flex gap-2 mb-2">
+                                <button type="button" id="openCameraBtn" class="btn btn-success">
+                                    <i class="fas fa-camera"></i> Open Camera
+                                </button> &nbsp;&nbsp;
+                                <input type="file" class="form-control" name="photo" id="photo" accept="image/*" required>
+                            </div>
+                            
+                            <!-- Camera input for mobile and modern browsers -->
+                            <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display:none;">
+                            
+                            <!-- Image preview -->
+                            <div id="imagePreview" class="mt-2" style="display:none;">
+                                <img id="previewImage" src="#" alt="Image Preview" style="max-width:100%; max-height:300px;">
+                            </div>
+                        </div>
+
+                        <!-- Location Fields -->
+                        <div class="form-group mb-3">
+                            <label for="location" class="form-label">Location:</label>
+                            <input type="text" class="form-control" name="location" id="location" readonly>
+                            
+                            <!-- Hidden inputs for latitude and longitude -->
+                            <input type="hidden" name="latitude" id="latitude">
+                            <input type="hidden" name="longitude" id="longitude">
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label for="waste_type" class="form-label">Waste Type:</label>
+                            <select class="form-select" name="waste_type" id="waste_type">
+                                <option value="Plastic">Plastic</option>
+                                <option value="Organic">Organic</option>
+                                <option value="Hazardous">Hazardous</option>
+                                <option value="General">General</option>
+                                <option value="Mixed-waste">Mixed-waste</option>
+                                <option value="Unsorted Waste">Unsorted Waste</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label for="description" class="form-label">Description:</label>
+                            <textarea class="form-control" name="description" id="description" rows="3"></textarea>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label for="nearbyLandmarks" class="form-label">Nearby Landmarks:</label>
+                            <input type="text" class="form-control" name="nearbyLandmarks" id="nearbyLandmarks">
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label for="contactInformation" class="form-label">Contact Information:</label>
+                            <input type="text" class="form-control" name="contactInformation" id="contactInformation">
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label for="priority" class="form-label">Priority Level:</label>
+                            <select class="form-select" name="priority" id="priority">
+                                <option value="low">Low</option>
+                                <option value="medium">Medium</option>
+                                <option value="high">High</option>
+                            </select>
+                        </div>
+
+                        <div class="text-center">
+                            <button type="submit" class="btn btn-primary btn-lg">Submit Report</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="{% static 'js/upload_photo.js' %}"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const locationInput = document.getElementById('location');
+    const latitudeInput = document.getElementById('latitude');
+    const longitudeInput = document.getElementById('longitude');
+
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+            function(position) {
+                const lat = position.coords.latitude;
+                const lon = position.coords.longitude;
+
+                // Update hidden input fields
+                latitudeInput.value = lat;
+                longitudeInput.value = lon;
+
+                // Fetch human-readable address using Reverse Geocoding (Optional)
+                fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        locationInput.value = data.display_name || "Location not found";
+                    })
+                    .catch(error => {
+                        console.error("Error fetching location name:", error);
+                        locationInput.value = `Lat: ${lat}, Lon: ${lon}`;  // Fallback
+                    });
+            },
+            function(error) {
+                console.error("Geolocation error:", error);
+                locationInput.value = "Location permission denied";
+            }
+        );
+    } else {
+        console.error("Geolocation is not supported by this browser.");
+        locationInput.value = "Geolocation not supported";
+    }
+
+    // Image Preview and Camera Handling
+    const openCameraBtn = document.getElementById('openCameraBtn');
+    const cameraInput = document.getElementById('cameraInput');
+    const photoInput = document.getElementById('photo');
+    const imagePreview = document.getElementById('imagePreview');
+    const previewImage = document.getElementById('previewImage');
+
+    // Trigger camera input when Open Camera button is clicked
+    openCameraBtn.addEventListener('click', function() {
+        cameraInput.click();
+    });
+
+    // Handle camera input change
+    cameraInput.addEventListener('change', function(event) {
+        const file = event.target.files[0];
+        if (file) {
+            // Update file input
+            photoInput.files = event.target.files;
+
+            // Create file reader to show preview
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                previewImage.src = e.target.result;
+                imagePreview.style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+
+    // Handle file input change (traditional file selection)
+    photoInput.addEventListener('change', function(event) {
+        const file = event.target.files[0];
+        if (file) {
+            // Create file reader to show preview
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                previewImage.src = e.target.result;
+                imagePreview.style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+});
+</script>
+
 {% endblock %}
