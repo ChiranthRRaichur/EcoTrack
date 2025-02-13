@@ -13,26 +13,68 @@ from .models import WasteReport, CustomUser
 from admin_app.models import WasteReportStatus
 from .utils import get_image_hash, haversine
 
-# Utility Functions
+def get_image_hash(image_file):
+    """
+    Generate a hash for the given image using perceptual hashing and store it in the fake blockchain.
+    """
+    image = Image.open(image_file)
+    img_hash = str(imagehash.phash(image))
+
+    blockchain.create_block(img_hash, 0, 0) 
+
+    return img_hash
+
 def haversine(lat1, lon1, lat2, lon2):
     """
-    Calculate the great-circle distance between two points on Earth.
+    Calculate the great-circle distance between two points and log location in blockchain.
     """
-    R = 6371  # Radius of the Earth in kilometers
+    R = 6371  # Radius of the Earth in km
     lat1, lon1, lat2, lon2 = map(math.radians, [lat1, lon1, lat2, lon2])
     dlat = lat2 - lat1
     dlon = lon2 - lon1
     a = math.sin(dlat / 2) ** 2 + math.cos(lat1) * math.cos(lat2) * math.sin(dlon / 2) ** 2
     c = 2 * math.asin(math.sqrt(a))
-    return R * c * 1000  # Convert to meters
+    distance = R * c * 1000  # Convert to meters
+
+    # Store the location in our fake blockchain
+    blockchain.create_block("Location Data", lat1, lon1)
+
+    return distance
 
 
-def get_image_hash(image_file):
-    """
-    Generate a hash for the given image using perceptual hashing.
-    """
-    image = Image.open(image_file)
-    return str(imagehash.phash(image))
+import hashlib
+import time
+
+class hyperledgerBlockchain:
+    def __init__(self):
+        self.chain = []  # Fake blockchain list
+
+    def create_block(self, image_hash, latitude, longitude):
+        block = {
+            'index': len(self.chain) + 1,
+            'timestamp': time.time(),
+            'image_hash': image_hash,
+            'location': (latitude, longitude),
+            'previous_hash': self.chain[-1]['block_hash'] if self.chain else "0",
+        }
+        block['block_hash'] = self.hash_block(block)  # Generate block hash
+        self.chain.append(block)  # Add block to chain
+        return block
+
+    @staticmethod
+    def hash_block(block):
+        block_string = f"{block['index']}{block['timestamp']}{block['image_hash']}{block['location']}{block['previous_hash']}"
+        return hashlib.sha256(block_string.encode()).hexdigest()
+
+    def get_chain(self):
+        return self.chain  # Returns the dummy blockchain data
+
+# Create a dummy blockchain instance
+blockchain = hyperledgerBlockchain()
+
+
+
+
 
 
 # Views
@@ -48,11 +90,11 @@ def signup(request):
         form = SignupForm(request.POST)
         if form.is_valid():
             user = form.save(commit=False)
-            user.is_active = True  # Ensure the user is active
-            user.is_staff = False  # Regular users should not have staff privileges
-            user.set_password(form.cleaned_data['password1'])  # Set hashed password
+            user.is_active = True  
+            user.is_staff = False  
+            user.set_password(form.cleaned_data['password1'])  
             user.save()
-            return redirect('login')  # Redirect to login page after signup
+            return redirect('login')  
     else:
         form = SignupForm()
     return render(request, 'signup.html', {'form': form})
@@ -260,6 +302,29 @@ def submit_report(request):
 #     return render(request, 'submit_report.html')
 
 
+# # Utility Functions
+# def haversine(lat1, lon1, lat2, lon2):
+#     """
+#     Calculate the great-circle distance between two points on Earth.
+#     """
+#     R = 6371  # Radius of the Earth in kilometers
+#     lat1, lon1, lat2, lon2 = map(math.radians, [lat1, lon1, lat2, lon2])
+#     dlat = lat2 - lat1
+#     dlon = lon2 - lon1
+#     a = math.sin(dlat / 2) ** 2 + math.cos(lat1) * math.cos(lat2) * math.sin(dlon / 2) ** 2
+#     c = 2 * math.asin(math.sqrt(a))
+#     return R * c * 1000  # Convert to meters
+
+
+# def get_image_hash(image_file):
+#     """
+#     Generate a hash for the given image using perceptual hashing.
+#     """
+#     image = Image.open(image_file)
+#     return str(imagehash.phash(image))
+
+
+
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 
@@ -274,7 +339,7 @@ def upload_photo(request):
             location = request.POST.get('location', 'Unknown Location')
             latitude = float(request.POST.get('latitude'))
             longitude = float(request.POST.get('longitude'))
-            waste_type = request.POST.get('waste_type', 'General')  # Default to "General" if not provided
+            waste_type = request.POST.get('waste_type', 'General')  
             photo = request.FILES.get('photo')
 
             if not photo:
