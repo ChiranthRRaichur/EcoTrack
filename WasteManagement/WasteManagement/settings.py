@@ -151,7 +151,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv('SECRET_KEY', 'fallback-secret-key')
 DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '127.0.0.1,localhost').split(',')
+ALLOWED_HOSTS = ['ecotrack-g7p0.onrender.com', 'localhost', '127.0.0.1']
+
 CSRF_TRUSTED_ORIGINS = ['https://ecotrack-g7p0.onrender.com']
 
 # Database Setup
