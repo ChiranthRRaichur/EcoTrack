@@ -152,7 +152,7 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'fallback-secret-key')
 DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '127.0.0.1,localhost').split(',')
-CSRF_TRUSTED_ORIGINS = ['https://ecotrackapp.onrender.com']
+CSRF_TRUSTED_ORIGINS = ['https://ecotrack-g7p0.onrender.com']
 
 # Database Setup
 DATABASE_URL = os.getenv("DATABASE_URL")  # Get the DATABASE_URL from environment variables
