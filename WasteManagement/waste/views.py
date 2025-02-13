@@ -13,69 +13,27 @@ from .models import WasteReport, CustomUser
 from admin_app.models import WasteReportStatus
 from .utils import get_image_hash, haversine
 
-def get_image_hash(image_file):
-    """
-    Generate a hash for the given image using perceptual hashing and store it in the fake blockchain.
-    """
-    image = Image.open(image_file)
-    img_hash = str(imagehash.phash(image))
 
-    blockchain.create_block(img_hash, 0, 0) 
-
-    return img_hash
-
+# Utility Functions
 def haversine(lat1, lon1, lat2, lon2):
     """
-    Calculate the great-circle distance between two points and log location in blockchain.
+    Calculate the great-circle distance between two points on Earth.
     """
-    R = 6371  # Radius of the Earth in km
+    R = 6371  # Radius of the Earth in kilometers
     lat1, lon1, lat2, lon2 = map(math.radians, [lat1, lon1, lat2, lon2])
     dlat = lat2 - lat1
     dlon = lon2 - lon1
     a = math.sin(dlat / 2) ** 2 + math.cos(lat1) * math.cos(lat2) * math.sin(dlon / 2) ** 2
     c = 2 * math.asin(math.sqrt(a))
-    distance = R * c * 1000  # Convert to meters
-
-    # Store the location in our fake blockchain
-    blockchain.create_block("Location Data", lat1, lon1)
-
-    return distance
+    return R * c * 1000  # Convert to meters
 
 
-import hashlib
-import time
-
-class hyperledgerBlockchain:
-    def __init__(self):
-        self.chain = []  # Fake blockchain list
-
-    def create_block(self, image_hash, latitude, longitude):
-        block = {
-            'index': len(self.chain) + 1,
-            'timestamp': time.time(),
-            'image_hash': image_hash,
-            'location': (latitude, longitude),
-            'previous_hash': self.chain[-1]['block_hash'] if self.chain else "0",
-        }
-        block['block_hash'] = self.hash_block(block)  # Generate block hash
-        self.chain.append(block)  # Add block to chain
-        return block
-
-    @staticmethod
-    def hash_block(block):
-        block_string = f"{block['index']}{block['timestamp']}{block['image_hash']}{block['location']}{block['previous_hash']}"
-        return hashlib.sha256(block_string.encode()).hexdigest()
-
-    def get_chain(self):
-        return self.chain  # Returns the dummy blockchain data
-
-# Create a dummy blockchain instance
-blockchain = hyperledgerBlockchain()
-
-
-
-
-
+def get_image_hash(image_file):
+    """
+    Generate a hash for the given image using perceptual hashing.
+    """
+    image = Image.open(image_file)
+    return str(imagehash.phash(image))
 
 # Views
 def home(request):
@@ -239,91 +197,6 @@ def submit_report(request):
     return HttpResponseRedirect(reverse('upload_photo'))
 
 
-# @login_required
-# def submit_report(request):
-#     """
-#     Handles waste report submission with global duplicate detection and scoring.
-#     """
-#     if request.method == 'POST':
-#         try:
-#             photo = request.FILES.get('photo')
-#             location = request.POST.get('location')
-#             latitude = float(request.POST.get('latitude'))
-#             longitude = float(request.POST.get('longitude'))
-#             waste_type = request.POST.get('waste_type', 'General')  # Default to "General" if not provided
-
-#             if not all([photo, location, latitude, longitude, waste_type]):
-#                 messages.error(request, "All fields are required to submit the report.")
-#                 return redirect('submit_report')
-
-#             # Generate hash for the photo
-#             photo_hash = get_image_hash(photo)
-
-#             # Track global duplicate submissions
-#             duplicate_reports = WasteReport.objects.filter(photo_hash=photo_hash)
-#             submission_count = 0
-
-#             for report in duplicate_reports:
-#                 distance = haversine(latitude, longitude, report.latitude, report.longitude)
-#                 if distance < 20:  # Check proximity within 20 meters
-#                     submission_count += 1
-
-#             # Handle response based on global submission count
-#             if submission_count >= 2:
-#                 messages.warning(request, "This report has already been submitted twice globally. Further duplicates are not allowed.")
-#                 return redirect('submit_report')
-#             elif submission_count == 1:
-#                 points_awarded = 5
-#             else:
-#                 points_awarded = 10
-
-#             # Create the new report
-#             WasteReport.objects.create(
-#                 user=request.user,
-#                 photo=photo,
-#                 photo_hash=photo_hash,
-#                 location=location,
-#                 waste_type=waste_type,  # Save the waste type
-#                 latitude=latitude,
-#                 longitude=longitude
-#             )
-
-#             # Update user points
-#             request.user.points += points_awarded
-#             request.user.save()
-
-#             messages.success(request, f"Report submitted successfully! You earned {points_awarded} points.")
-#             return redirect('user_history')
-
-#         except Exception as e:
-#             messages.error(request, f"Error submitting report: {str(e)}")
-#             return redirect('submit_report')
-
-#     return render(request, 'submit_report.html')
-
-
-# # Utility Functions
-# def haversine(lat1, lon1, lat2, lon2):
-#     """
-#     Calculate the great-circle distance between two points on Earth.
-#     """
-#     R = 6371  # Radius of the Earth in kilometers
-#     lat1, lon1, lat2, lon2 = map(math.radians, [lat1, lon1, lat2, lon2])
-#     dlat = lat2 - lat1
-#     dlon = lon2 - lon1
-#     a = math.sin(dlat / 2) ** 2 + math.cos(lat1) * math.cos(lat2) * math.sin(dlon / 2) ** 2
-#     c = 2 * math.asin(math.sqrt(a))
-#     return R * c * 1000  # Convert to meters
-
-
-# def get_image_hash(image_file):
-#     """
-#     Generate a hash for the given image using perceptual hashing.
-#     """
-#     image = Image.open(image_file)
-#     return str(imagehash.phash(image))
-
-
 
 from django.http import HttpResponseRedirect
 from django.urls import reverse
@@ -409,48 +282,3 @@ def submission_status(request):
     message = request.GET.get('message', 'No status available.')
     return render(request, 'submission_status.html', {'alert_type': alert_type, 'message': message})
 
-
-# def add_waste_data():
-#     print("Simulating adding data to Hyperledger Fabric...")
-#     print("Data added:")
-
-# # Dummy function to query waste data
-# def query_waste_data(waste_id):
-#     print(f"Simulating querying data for waste ID: {waste_id}")
-#     print("Queried data:")
-
-# # Dummy function to detect duplicate reports
-# def detect_duplicate_report(new_report):
-#     print("Simulating checking for duplicate reports...")
-#     existing_reports = [
-#         {
-#             "id": "1",
-#             "location": "Bengaluru",
-#             "description": "Overflowing garbage bin",
-#             "timestamp": "2024-12-20T15:00:00Z",
-#             "reported_by": "User456"
-#         }
-#     ]
-
-#     for report in existing_reports:
-#         if report["location"] == new_report["location"] and report["description"] == new_report["description"]:
-#             print("Duplicate report detected:", report)
-#             return True
-
-#     print("No duplicate report found.")
-#     return False
-
-# # Demonstrate adding, querying, and detecting duplicate waste data
-# if __name__ == "__main__":
-#     print("Adding data to Hyperledger Fabric...")
-#     add_waste_data()
-
-#     print("\nQuerying data from Hyperledger Fabric...")
-#     query_waste_data("1")
-
-#     print("\nDetecting duplicate reports...")
-#     duplicate_found = detect_duplicate_report()
-#     if duplicate_found:
-#         print("Duplicate report exists.")
-#     else:
-#         print("Report is unique.")
